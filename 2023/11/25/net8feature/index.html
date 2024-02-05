@@ -1,0 +1,245 @@
+<!DOCTYPE html><html lang="zh-cmn-Hans" prefix="og: http://ogp.me/ns#" class="han-init"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /><title>.Net8新特性 &mdash; 码农感悟</title><link rel="stylesheet" href="https://usteinfo.github.io/assets/vendor/primer-css/css/primer.css"><link rel="stylesheet" href="https://usteinfo.github.io/assets/css/components/collection.css"><link rel="stylesheet" href="https://usteinfo.github.io/assets/css/components/repo-card.css"><link rel="stylesheet" href="https://usteinfo.github.io/assets/css/sections/repo-list.css"><link rel="stylesheet" href="https://usteinfo.github.io/assets/css/components/boxed-group.css"><link rel="stylesheet" href="https://usteinfo.github.io/assets/css/globals/common.css"><link rel="stylesheet" href="https://usteinfo.github.io/assets/css/globals/responsive.css"><link rel="stylesheet" href="https://usteinfo.github.io/assets/css/posts/index.css"><link rel="stylesheet" href="https://usteinfo.github.io/assets/vendor/octicons/octicons/octicons.css"><link rel="stylesheet" href="https://mazhuang.org/rouge-themes/dist/github.css"><link rel="canonical" href="https://usteinfo.github.io/2023/11/25/net8feature/"><link rel="alternate" type="application/atom+xml" title="码农感悟" href="https://usteinfo.github.io/feed.xml"><link rel="shortcut icon" href="https://usteinfo.github.io/favicon.ico"><meta property="og:title" content=".Net8新特性"><meta name="keywords" content="Net, 新特性"><meta name="og:keywords" content="Net, 新特性"><meta name="description" content="本文整理.Net8新特性的使用方法。当前包括： Route ShortCircuit Exception Throw Helper HttpLoggingMiddleware 的改进 C# 12 中的 InlineArray 特性 随机数增强 KeyedServices IPNetwork"><meta name="og:description" content="本文整理.Net8新特性的使用方法。当前包括： Route ShortCircuit Exception Throw Helper HttpLoggingMiddleware 的改进 C# 12 中的 InlineArray 特性 随机数增强 KeyedServices IPNetwork"><meta property="og:url" content="https://usteinfo.github.io/2023/11/25/net8feature/"><meta property="og:site_name" content="码农感悟"><meta property="og:type" content="article"><meta property="og:locale" content="zh_CN" /><meta property="article:published_time" content="2023-11-25"> <script src="https://usteinfo.github.io/assets/vendor/jquery/dist/jquery.min.js"></script> <script src="https://usteinfo.github.io/assets/js/main.js"></script></head><body class="" data-mz=""><header class="site-header"><div class="container"><h1><a href="https://usteinfo.github.io/" title="码农感悟"><span class="octicon octicon-mark-github"></span> 码农感悟</a></h1><button class="collapsed mobile-visible" type="button" onclick="toggleMenu();"> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button><nav class="site-header-nav" role="navigation"> <a href="https://usteinfo.github.io/" class="site-header-nav-item" target="" title="首页">首页</a> <a href="https://usteinfo.github.io/categories/" class="site-header-nav-item" target="" title="分类">分类</a> <a href="https://usteinfo.github.io/archives/" class="mobile-hidden site-header-nav-item" target="" title="归档">归档</a> <a href="https://usteinfo.github.io/open-source/" class="mobile-hidden site-header-nav-item" target="" title="开源">开源</a> <a href="https://usteinfo.github.io/fragments/" class="site-header-nav-item" target="" title="片段">片段</a> <a href="https://usteinfo.github.io/wiki/" class="site-header-nav-item" target="" title="维基">维基</a> <a href="https://usteinfo.github.io/links/" class="mobile-hidden site-header-nav-item" target="" title="链接">链接</a> <a href="https://usteinfo.github.io/about/" class="site-header-nav-item" target="" title="关于">关于</a> <a class="mobile-hidden" href="https://usteinfo.github.io/feed.xml"><span class="octicon octicon-rss" style="color:orange;"></span></a></nav></div></header><section class="collection-head small geopattern" data-pattern-id=".Net8新特性"><div class="container"><div class="columns"><div class="column three-fourths"><div class="collection-title"><h1 class="collection-header">.Net8新特性</h1><div class="collection-info"> <span class="meta-info"> <span class="octicon octicon-calendar"></span> 2023/11/25 </span> <span class="meta-info"> <span class="octicon octicon-file-directory"></span> <a href="https://usteinfo.github.io/categories/#Net" title="Net">Net</a> </span> <span class="meta-info"> <span class="octicon octicon-file-directory"></span> <a href="https://usteinfo.github.io/categories/#新特性" title="新特性">新特性</a> </span> <span class="meta-info"> <span class="octicon octicon-clock"></span> 共 8301 字，约 24 分钟 </span></div></div></div><div class="column one-fourth mobile-hidden"><div class="collection-title"> <img style="height:72px;width:72px" src="https://usteinfo.github.io/assets/images/qrcode.jpg" alt="码农感悟" /></div></div></div></div></section><section class="container content"><div class="columns"><div class="column three-fourths" ><article class="article-content markdown-body"><p>本文整理.Net8新特性的使用方法。 当前包括：</p><ul><li>Route ShortCircuit</li><li>Exception Throw Helper</li><li>HttpLoggingMiddleware 的改进</li><li>C# 12 中的 InlineArray 特性</li><li>随机数增强</li><li>KeyedServices</li><li>IPNetwork</li></ul><h2 id="route-shortcircuit">Route ShortCircuit</h2><p>有些请求，如浏览器会自动请求 favicon.ico，这些请求即使很简单，往往也会完整地运行中间件管道，但实际上可能并不需要，在 .NET 8 中引入了一个 Route ShortCircuit 的功能，也就是路由短路，可以在处理结束之后马上中断请求，不再执行后面的中间件了，这样会使得这样的路由或者 API 更加高效。</p><p>在 route 后添加 <code class="language-plaintext highlighter-rouge">ShortCircut()</code> 来启用，使用方法如下：</p><div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">builder</span> <span class="p">=</span> <span class="n">WebApplication</span><span class="p">.</span><span class="nf">CreateSlimBuilder</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+
+<span class="kt">var</span> <span class="n">app</span> <span class="p">=</span> <span class="n">builder</span><span class="p">.</span><span class="nf">Build</span><span class="p">();</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">Use</span><span class="p">(</span><span class="k">async</span> <span class="p">(</span><span class="n">HttpContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">RequestDelegate</span> <span class="n">next</span><span class="p">)</span> <span class="p">=&gt;</span>
+<span class="p">{</span>
+    <span class="n">context</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">Headers</span><span class="p">[</span><span class="s">"Value"</span><span class="p">]</span> <span class="p">=</span> <span class="s">"123"</span><span class="p">;</span>
+    <span class="k">await</span> <span class="nf">next</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+<span class="p">});</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">MapGet</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="s">"Hello .NET 8!"</span><span class="p">);</span>
+
+<span class="c1">// ShortCircuit</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">MapGet</span><span class="p">(</span><span class="s">"/short-circuit"</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="s">"Short circuiting!"</span><span class="p">).</span><span class="nf">ShortCircuit</span><span class="p">();</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">MapGet</span><span class="p">(</span><span class="s">"/short-circuit-status"</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="s">"Short circuiting!"</span><span class="p">)</span>
+            <span class="p">.</span><span class="nf">ShortCircuit</span><span class="p">(</span><span class="m">401</span><span class="p">);</span>
+<span class="c1">// MapShortCircuit</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">MapShortCircuit</span><span class="p">(</span><span class="m">404</span><span class="p">,</span> <span class="s">"robots.txt"</span><span class="p">,</span> <span class="s">"favicon.ico"</span><span class="p">);</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">MapShortCircuit</span><span class="p">(</span><span class="m">403</span><span class="p">,</span> <span class="s">"admin"</span><span class="p">);</span>
+
+<span class="k">await</span> <span class="n">app</span><span class="p">.</span><span class="nf">RunAsync</span><span class="p">();</span>
+</code></pre></div></div><h2 id="exception-throw-helper">Exception Throw Helper</h2><p>在 .NET 6 中，引入了一个 ArgumentNullException.ThrowIfNull(object? argument, string? paramName = default) 的方法，在 .NET 7/8 中引入了更多的支持，我们可以在代码里使用这些 exception helper 来简化一些代码。</p><p>常用的 Argument exception：</p><div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">ArgumentNullExceptionSample</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
+
+<span class="nf">ArgumentExceptionThrowIfNullOrEmptySample</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
+<span class="nf">ArgumentExceptionThrowIfNullOrEmptySample</span><span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="n">Empty</span><span class="p">);</span>
+
+<span class="nf">ArgumentExceptionThrowIfNullOrWhiteSpaceSample</span><span class="p">(</span><span class="k">null</span><span class="p">);</span>
+<span class="nf">ArgumentExceptionThrowIfNullOrWhiteSpaceSample</span><span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="n">Empty</span><span class="p">);</span>
+<span class="nf">ArgumentExceptionThrowIfNullOrWhiteSpaceSample</span><span class="p">(</span><span class="s">" "</span><span class="p">);</span>
+
+<span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">ArgumentNullExceptionSample</span><span class="p">(</span><span class="kt">string</span><span class="p">?</span> <span class="k">value</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">InvokeHelper</span><span class="p">.</span><span class="nf">TryInvoke</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="n">ArgumentNullException</span><span class="p">.</span><span class="nf">ThrowIfNull</span><span class="p">(</span><span class="k">value</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">ArgumentExceptionThrowIfNullOrEmptySample</span><span class="p">(</span><span class="kt">string</span><span class="p">?</span> <span class="k">value</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">InvokeHelper</span><span class="p">.</span><span class="nf">TryInvoke</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="n">ArgumentException</span><span class="p">.</span><span class="nf">ThrowIfNullOrEmpty</span><span class="p">(</span><span class="k">value</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">ArgumentExceptionThrowIfNullOrWhiteSpaceSample</span><span class="p">(</span><span class="kt">string</span><span class="p">?</span> <span class="k">value</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">InvokeHelper</span><span class="p">.</span><span class="nf">TryInvoke</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="n">ArgumentException</span><span class="p">.</span><span class="nf">ThrowIfNullOrWhiteSpace</span><span class="p">(</span><span class="k">value</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div><p><code class="language-plaintext highlighter-rouge">ArgumentNullException.ThrowIfNull(object? obj, string? paramName = default)</code> 是 .NET 6 开始支持的</p><p>在 .NET 7 里支持了指针的判断 <code class="language-plaintext highlighter-rouge">ArgumentNullException.ThrowIfNull(void* argument, string? paramName = default)</code>(not CLS-compliant)</p><p>.NET 7 还引入了 <code class="language-plaintext highlighter-rouge">ArgumentException.ThrowIfNullOrEmpty(string? value, string? paramName = default)</code>, 增加判断空字符串的场景</p><p>.NET 8 引入了 <code class="language-plaintext highlighter-rouge">ArgumentException.ThrowIfNullOrWhiteSpace(string? value, string? paramName = default)</code> 增强了判断空字符串的场景</p><h2 id="httploggingmiddleware-的改进">HttpLoggingMiddleware 的改进</h2><p>.NET 6 开始引入了一个 http logging 的中间件，我们可以借助于 http logging 的中间件记录请求和响应的信息，但是扩展性不是很强，在 .NET 8 版本中进行了一些优化，引入了一些新的配置和 HttpLoggingInterceptor 使得它更加容易扩展了</p><p>HttpLoggingFields 中新增了一个 Duration 枚举值，会记录请求处理的耗时</p><p>在 HttpLoggingOptions 中增加了一个 CombineLogs 的配置，默认是 false，默认 request/response/duration 的 log 都是分开的,配置为 true 之后就会合并成一条日志。</p><p>##　HttpLoggingInterceptor</p><p>.NET 8 还引入了 IHttpLoggingInterceptor，借助于此可以更好的扩展 http logging</p><p>可以根据 Request 或者 Response 信息来动态地调整要记录的 field 或者动态调整 RequestBodyLogLimit/ResponseBodyLogLimit</p><p>来看一个 HttpLoggingInterceptor 示例：</p><div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">file</span> <span class="k">sealed</span> <span class="k">class</span> <span class="nc">MyHttpLoggingInterceptor</span><span class="p">:</span> <span class="n">IHttpLoggingInterceptor</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="n">ValueTask</span> <span class="nf">OnRequestAsync</span><span class="p">(</span><span class="n">HttpLoggingInterceptorContext</span> <span class="n">logContext</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">logContext</span><span class="p">.</span><span class="n">HttpContext</span><span class="p">.</span><span class="n">Request</span><span class="p">.</span><span class="n">Path</span><span class="p">.</span><span class="n">Value</span><span class="p">?.</span><span class="nf">StartsWith</span><span class="p">(</span><span class="s">"/req-"</span><span class="p">)</span> <span class="p">==</span> <span class="k">true</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">logContext</span><span class="p">.</span><span class="n">LoggingFields</span> <span class="p">=</span> <span class="n">HttpLoggingFields</span><span class="p">.</span><span class="n">ResponsePropertiesAndHeaders</span><span class="p">;</span>
+            <span class="n">logContext</span><span class="p">.</span><span class="nf">AddParameter</span><span class="p">(</span><span class="s">"req-path"</span><span class="p">,</span> <span class="n">logContext</span><span class="p">.</span><span class="n">HttpContext</span><span class="p">.</span><span class="n">Request</span><span class="p">.</span><span class="n">Path</span><span class="p">.</span><span class="n">Value</span><span class="p">);</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">ValueTask</span><span class="p">.</span><span class="n">CompletedTask</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="n">ValueTask</span> <span class="nf">OnResponseAsync</span><span class="p">(</span><span class="n">HttpLoggingInterceptorContext</span> <span class="n">logContext</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">logContext</span><span class="p">.</span><span class="n">HttpContext</span> <span class="k">is</span> <span class="p">{</span> <span class="n">Response</span><span class="p">.</span><span class="n">StatusCode</span><span class="p">:</span> <span class="p">&gt;=</span><span class="m">200</span> <span class="n">and</span> <span class="p">&lt;</span> <span class="m">300</span><span class="p">,</span> <span class="n">Request</span><span class="p">.</span><span class="n">Path</span><span class="p">.</span><span class="n">Value</span><span class="p">:</span> <span class="s">"/hello"</span> <span class="p">})</span>
+        <span class="p">{</span>
+            <span class="n">logContext</span><span class="p">.</span><span class="nf">TryDisable</span><span class="p">(</span><span class="n">HttpLoggingFields</span><span class="p">.</span><span class="n">All</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">ValueTask</span><span class="p">.</span><span class="n">CompletedTask</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div><p>使用示例如下，使用 AddHttpLoggingInterceptor<TInterceptor>() 来注册：</TInterceptor></p><div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">builder</span> <span class="p">=</span> <span class="n">WebApplication</span><span class="p">.</span><span class="nf">CreateSlimBuilder</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">Services</span><span class="p">.</span><span class="nf">AddHttpLogging</span><span class="p">(</span><span class="n">options</span> <span class="p">=&gt;</span>
+<span class="p">{</span>
+    <span class="n">options</span><span class="p">.</span><span class="n">LoggingFields</span> <span class="p">=</span> <span class="n">HttpLoggingFields</span><span class="p">.</span><span class="n">All</span><span class="p">;</span>
+    <span class="n">options</span><span class="p">.</span><span class="n">CombineLogs</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">Services</span><span class="p">.</span><span class="n">AddHttpLoggingInterceptor</span><span class="p">&lt;</span><span class="n">MyHttpLoggingInterceptor</span><span class="p">&gt;();</span>
+
+<span class="kt">var</span> <span class="n">app</span> <span class="p">=</span> <span class="n">builder</span><span class="p">.</span><span class="nf">Build</span><span class="p">();</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">UseHttpLogging</span><span class="p">();</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">MapGet</span><span class="p">(</span><span class="s">"/hello"</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="s">"Hello"</span><span class="p">);</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">MapGet</span><span class="p">(</span><span class="s">"/crash"</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="n">Results</span><span class="p">.</span><span class="nf">BadRequest</span><span class="p">());</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">MapGet</span><span class="p">(</span><span class="s">"/req-intercept"</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="s">"Hello .NET 8"</span><span class="p">);</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">Run</span><span class="p">();</span>
+</code></pre></div></div><p>appliction.json文件中加入</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware": "Information"
+</code></pre></div></div><p>运行应用</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PS C:\MyData\Source\Net8Test\WebApplication1\bin\Debug\net8.0&gt; dotnet-http :5055/hello
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+Date: Sat, 25 Nov 2023 08:53:59 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+//日志
+
+info: Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware[9]
+      Request and Response:
+      Protocol: HTTP/1.1
+      Method: GET
+      Scheme: http
+      PathBase:
+      Path: /hello
+      Host: localhost:5055
+      User-Agent: dotnet-httpie/0.7.2
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PS C:\MyData\Source\Net8Test\WebApplication1\bin\Debug\net8.0&gt; dotnet-http :5055/crash
+HTTP/1.1 400 BadRequest
+Content-Length: 0
+Date: Sat, 25 Nov 2023 08:53:40 GMT
+Server: Kestrel
+
+info: Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware[9]
+      Request and Response:
+      Protocol: HTTP/1.1
+      Method: GET
+      Scheme: http
+      PathBase:
+      Path: /crash
+      Host: localhost:5055
+      User-Agent: dotnet-httpie/0.7.2
+      StatusCode: 400
+      Duration: 9.8983
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PS C:\MyData\Source\Net8Test\WebApplication1\bin\Debug\net8.0&gt; dotnet-http :5055/req-intercept
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+Date: Sat, 25 Nov 2023 08:53:14 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+info: Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware[9]
+      Request and Response:
+      req-path: /req-intercept
+      StatusCode: 200
+      Content-Type: text/plain; charset=utf-8
+</code></pre></div></div><p>可以看到每个请求的 log 输出的结果都有所不同，第一个请求虽然我们设置了 ogContext.TryDisable(HttpLoggingFields.All) 但是还是有输出结果这是因为 httpLogging 目前的实现就是这样，在 Response 里处理的时候 request 信息已经被记录好了，详细可以参考 http logging middleware 的 <a href="https://github.com/dotnet/aspnetcore/blob/main/src/Middleware/HttpLogging/src/HttpLoggingMiddleware.cs">实现</a></p><p>如果想要完全 disable 需要在 OnRequestAsync 方法里处理</p><div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="n">ValueTask</span> <span class="nf">OnRequestAsync</span><span class="p">(</span><span class="n">HttpLoggingInterceptorContext</span> <span class="n">logContext</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="s">"/no-log"</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="n">logContext</span><span class="p">.</span><span class="n">HttpContext</span><span class="p">.</span><span class="n">Request</span><span class="p">.</span><span class="n">Path</span><span class="p">.</span><span class="n">Value</span><span class="p">,</span> <span class="n">StringComparison</span><span class="p">.</span><span class="n">OrdinalIgnoreCase</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="n">logContext</span><span class="p">.</span><span class="n">LoggingFields</span> <span class="p">=</span> <span class="n">HttpLoggingFields</span><span class="p">.</span><span class="n">None</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">//</span>
+    <span class="k">return</span> <span class="n">ValueTask</span><span class="p">.</span><span class="n">CompletedTask</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div><p>这样请求就不会有日志打印了</p><p>最后一个 req-intercept 在 request 的处理中设置了 ResponsePropertiesAndHeaders 并且加了一个自定义的 Parameter 从输出结果可以看到有输出到日志</p><p>More 大家可以自己尝试一下，比之前会好用一些，但是觉得还是有所欠缺</p><p>比如日志级别目前还都是 Information 不能动态的改变日志级别</p><p>另外就是前面提到的即使使用 CombineLogs 在 response 中设置为 HttpLoggingFields.None 时，依然会记录 request 信息，希望后面还会继续优化一下</p><blockquote><p>dotnet-http 可以通过如下命令安装：dotnet install dotnet-httpie</p></blockquote><h2 id="c-12-中的-inlinearray-特性">C# 12 中的 InlineArray 特性</h2><p>C# 12 引入了一个 InlineArray 特性，利用这一特性，我们可以更方便地类数组的结构体，可以代替原来要使用非安全代码的 fixed size buffer</p><div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="n">System</span><span class="p">.</span><span class="n">Runtime</span><span class="p">.</span><span class="n">CompilerServices</span><span class="p">.</span><span class="nf">InlineArray</span><span class="p">(</span><span class="m">10</span><span class="p">)]</span>
+<span class="n">file</span> <span class="k">struct</span> <span class="nc">MyArray</span>
+<span class="p">{</span>
+    <span class="c1">// required</span>
+    <span class="k">private</span> <span class="kt">int</span> <span class="n">_element</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div><p>使用 InlineArray 需要指定 size，也就是 array 的长度，并且我们需要声明一个字段</p><p>使用示例如下：</p><div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">arr</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">MyArray</span><span class="p">();</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">10</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+<span class="p">{</span>
+    <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">=</span> <span class="n">i</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="k">in</span> <span class="n">arr</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="s">","</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">();</span>
+
+<span class="n">ReadOnlySpan</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="n">span</span> <span class="p">=</span> <span class="n">arr</span><span class="p">;</span>
+<span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="k">in</span> <span class="n">span</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="s">","</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">();</span>
+
+<span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="k">in</span> <span class="n">arr</span><span class="p">[^</span><span class="m">2.</span><span class="p">.])</span>
+<span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="s">","</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">();</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">arr</span><span class="p">[^</span><span class="m">1</span><span class="p">]);</span>
+
+<span class="c1">// error CS0021: Cannot apply indexing with [] to an expression of type 'MyArray'</span>
+<span class="c1">// if (arr is [0,1,..])</span>
+<span class="c1">//     Console.WriteLine("StartsWith 0, 1");</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">span</span> <span class="k">is</span> <span class="p">[</span><span class="m">0</span><span class="p">,</span><span class="m">1</span><span class="p">,..])</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"StartsWith 0, 1"</span><span class="p">);</span>
+
+<span class="c1">// error CS9174: Cannot initialize type 'MyArray' with a collection expression because the type is not constructible.</span>
+<span class="c1">// arr = [1, 2, 3, 4, 5];</span>
+
+<span class="n">span</span> <span class="p">=</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">4</span><span class="p">,</span><span class="m">5</span><span class="p">];</span>
+<span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">item</span> <span class="k">in</span> <span class="n">span</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">item</span><span class="p">);</span>
+    <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="s">","</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div><p>运行结果：</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0,1,2,3,4,5,6,7,8,9,
+0,1,2,3,4,5,6,7,8,9,
+8,9,
+9
+StartsWith 0, 1
+1,2,3,4,5,
+</code></pre></div></div><p>从这个示例可以看得出来，我们可以像使用数组一样使用，同时我们可以直接隐式转换成 Span 和 ReadOnlySpan, 并且可以使用 Index 和 Range 操作符,但是目前暂时不能直接使用集合表达式和 list pattern，但是我们可以转成 span 之后再使用</p><h2 id="随机数增强">随机数增强</h2><p>1、在 8 中对随机数类 Random 提供了 GetItems()方法，可以根据指定的数量在提供的一个集合中随机抽取数据项生成一个新的集合：</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ReadOnlySpan&lt;string&gt; colors = new[]{"Red","Green","Blue","Black"};
+
+string[] t1 = Random.Shared.GetItems(colors, 10);
+Console.WriteLine(JsonSerializer.Serialize(t1));
+
+//输出：["Black","Green","Blue","Blue","Green","Blue","Green","Black","Green","Blue"]
+//每次都会不一样
+Console.ReadKey();
+</code></pre></div></div><p>2、通过 Random 提供的 Shuffle() 方法，可以将一个集合中的数据项的顺序打乱：</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>string[] colors = new[]{"Red","Green","Blue","Black"};
+Random.Shared.Shuffle(colors);
+
+Console.WriteLine(JsonSerializer.Serialize(colors));
+
+Console.ReadKey();
+</code></pre></div></div><h2 id="keyedservices">KeyedServices</h2><p>要实现一个接口多个实现类的注入，还需要写一些额外的代码，比较繁琐。</p><p>版本 8 中添加了注入关键字，可以很方便实现，看下面代码：</p><div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">builder</span> <span class="p">=</span> <span class="n">WebApplication</span><span class="p">.</span><span class="nf">CreateBuilder</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+
+<span class="n">builder</span><span class="p">.</span><span class="n">Services</span><span class="p">.</span><span class="n">AddKeyedSingleton</span><span class="p">&lt;</span><span class="n">IUser</span><span class="p">,</span> <span class="n">UserA</span><span class="p">&gt;(</span><span class="s">"A"</span><span class="p">);</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">Services</span><span class="p">.</span><span class="n">AddKeyedSingleton</span><span class="p">&lt;</span><span class="n">IUser</span><span class="p">,</span> <span class="n">UserB</span><span class="p">&gt;(</span><span class="s">"B"</span><span class="p">);</span>
+
+<span class="kt">var</span> <span class="n">app</span> <span class="p">=</span> <span class="n">builder</span><span class="p">.</span><span class="nf">Build</span><span class="p">();</span>
+
+<span class="n">app</span><span class="p">.</span><span class="nf">MapGet</span><span class="p">(</span><span class="s">"/user1"</span><span class="p">,</span> <span class="p">([</span><span class="nf">FromKeyedServices</span><span class="p">(</span><span class="s">"A"</span><span class="p">)]</span> <span class="n">IUser</span> <span class="n">user</span><span class="p">)</span> <span class="p">=&gt;</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="s">$"hello , </span><span class="p">{</span><span class="n">user</span><span class="p">?.</span><span class="nf">GetName</span><span class="p">()}</span><span class="s">"</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="n">app</span><span class="p">.</span><span class="nf">MapGet</span><span class="p">(</span><span class="s">"/user2"</span><span class="p">,</span> <span class="p">([</span><span class="nf">FromKeyedServices</span><span class="p">(</span><span class="s">"B"</span><span class="p">)]</span> <span class="n">IUser</span> <span class="n">user</span><span class="p">)</span> <span class="p">=&gt;</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="s">$"hello , </span><span class="p">{</span><span class="n">user</span><span class="p">?.</span><span class="nf">GetName</span><span class="p">()}</span><span class="s">"</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="n">app</span><span class="p">.</span><span class="nf">Run</span><span class="p">();</span>
+
+<span class="k">internal</span> <span class="k">interface</span> <span class="nc">IUser</span>
+<span class="p">{</span>
+    <span class="kt">string</span> <span class="nf">GetName</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="k">internal</span> <span class="k">class</span> <span class="nc">UserA</span><span class="p">:</span> <span class="n">IUser</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="nf">GetName</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="s">"oec2023"</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">internal</span> <span class="k">class</span> <span class="nc">UserB</span> <span class="p">:</span> <span class="n">IUser</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="nf">GetName</span><span class="p">()</span> <span class="p">=&gt;</span> <span class="s">"oec2024"</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre></div></div><h2 id="ipnetwork">IPNetwork</h2><p>.NET 8 新增了 IPNetwork 的实现，支持 <a href="/wiki/2023-11-25%20CIDR/">CIDR</a> 网络格式。</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var ipNetwork = "198.51.0.0/16";
+var network = IPNetwork.Parse(ipNetwork);
+var ip = IPAddress.Parse("198.51.250.42");
+Console.WriteLine(network.Contains(ip));
+</code></pre></div></div><p>运行结果：</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>true
+</code></pre></div></div><div style="margin-top:2em;padding:0 1.5em;border:1px solid #d3d3d3;background-color:#deebf7"><h3>文档信息</h3><ul><li>本文作者：<a href="https://usteinfo.github.io" target="_blank">zhoubin</a></li><li>本文链接：<a href="https://usteinfo.github.io/2023/11/25/net8feature/" target="_blank">https://usteinfo.github.io/2023/11/25/net8feature/</a></li><li>版权声明：自由转载-非商用-非衍生-保持署名（<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh" target="_blank">创意共享3.0许可证</a>）</li></ul></div></article><div class="share"></div><div class="comment"> <script src="https://giscus.app/client.js" data-repo="usteinfo/blog-comments" data-repo-id="R_kgDOKL8L_A" data-category="Announcements" data-category-id="DIC_kwDOKL8L_M4CY4xg" data-mapping="title" data-strict="1" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="zh-CN" data-loading="lazy" crossorigin="anonymous" async> </script></div></div><div class="column one-fourth"><h3>Search</h3><div id="site_search"> <input style="width:96%" type="text" id="search_box" placeholder="Search"></div><ul id="search_results" style="font-size:14px;list-style-type:none;padding-top:10px;padding-left:10px;"></ul><script src="https://usteinfo.github.io/assets/js/simple-jekyll-search.min.js"></script> <script type="text/javascript"> SimpleJekyllSearch({ searchInput: document.getElementById('search_box'), resultsContainer: document.getElementById('search_results'), json: 'https://usteinfo.github.io/assets/search_data.json?v=1707138191', searchResultTemplate: '<li><a href="{url}" title="{title}">{title}</a></li>', noResultsText: 'No results found', limit: 10, fuzzy: false, exclude: ['Welcome'] }) </script><h3 class="post-directory-title mobile-hidden">Table of Contents</h3><div id="post-directory-module" class="mobile-hidden"><section class="post-directory"><dl></dl></section></div><script src="https://usteinfo.github.io/assets/js/jquery.toc.js"></script></div></div></section><footer class="container"><div class="site-footer" role="contentinfo"><div class="copyright left mobile-block"> © 2023 <span title="zhoubin">zhoubin</span> <a href="javascript:window.scrollTo(0,0)" class="right mobile-visible">TOP</a></div><ul class="site-footer-links right mobile-hidden"><li> <a href="javascript:window.scrollTo(0,0)" >TOP</a></li></ul><a href="https://github.com/usteinfo/usteinfo.github.io" target="_blank" aria-label="view source code"> <span class="mega-octicon octicon-mark-github" title="GitHub"></span> </a><ul class="site-footer-links mobile-hidden"><li> <a href="https://usteinfo.github.io/" title="首页" target="">首页</a></li><li> <a href="https://usteinfo.github.io/categories/" title="分类" target="">分类</a></li><li> <a href="https://usteinfo.github.io/archives/" title="归档" target="">归档</a></li><li> <a href="https://usteinfo.github.io/open-source/" title="开源" target="">开源</a></li><li> <a href="https://usteinfo.github.io/fragments/" title="片段" target="">片段</a></li><li> <a href="https://usteinfo.github.io/wiki/" title="维基" target="">维基</a></li><li> <a href="https://usteinfo.github.io/links/" title="链接" target="">链接</a></li><li> <a href="https://usteinfo.github.io/about/" title="关于" target="">关于</a></li><li><a href="https://usteinfo.github.io/feed.xml"><span class="octicon octicon-rss" style="color:orange;"></span></a></li></ul><script async src="https://usteinfo.github.io/assets/vendor/busuanzi/2.3/busuanzi.pure.mini.js"></script><div class="mobile-hidden" style="margin-top:8px"> <span id="busuanzi_container_site_pv" style="display:none"> 本站访问量<span id="busuanzi_value_site_pv"></span>次 </span> <span id="busuanzi_container_site_uv" style="display:none"> / 本站访客数<span id="busuanzi_value_site_uv"></span>人 </span> <span id="busuanzi_container_page_pv" style="display:none"> / 本页访问量<span id="busuanzi_value_page_pv"></span>次 / 统计始于2023-09-02 </span></div></div></footer><div class="tools-wrapper"> <a class="gotop" href="#" title="回到顶部"><span class="octicon octicon-arrow-up"></span></a></div><script src="https://usteinfo.github.io/assets/js/geopattern.js"></script> <script> jQuery(document).ready(function($) { $('.geopattern').each(function(){ $(this).geopattern($(this).data('pattern-id')); }); /* hljs.initHighlightingOnLoad(); */ }); </script></body></html>
