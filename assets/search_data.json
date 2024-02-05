@@ -125,18 +125,10 @@
     } ,
   
     {
-      "title"    : ".Net打包和发布",
-      "category" : "Net",
-      
-      "url"      : "https://zmngw.github.io/2023/09/02/.Net%E6%89%93%E5%8C%85%E5%92%8C%E5%8F%91%E5%B8%83/",
-      "keywords" : "打包,发布,Net"
-    } ,
-  
-    {
       "title"    : "C#语言特性",
       "category" : "Net",
       
-      "url"      : "https://zmngw.github.io/2023/09/02/C-%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7/",
+      "url"      : "https://zmngw.github.io/2023/09/02/CSharpFeature/",
       "keywords" : "Net, C#, CSharp"
     } ,
   
@@ -144,7 +136,7 @@
       "title"    : "Mysql Explain 详解",
       "category" : "mysql",
       
-      "url"      : "https://zmngw.github.io/2023/09/02/Mysql-Explain-%E8%AF%A6%E8%A7%A3/",
+      "url"      : "https://zmngw.github.io/2023/09/02/MysqlExplainDetail/",
       "keywords" : "Explain,MySql,执行计划,优化"
     } ,
   
@@ -152,7 +144,7 @@
       "title"    : "Mysql 查询优化",
       "category" : "mysql",
       
-      "url"      : "https://zmngw.github.io/2023/09/02/Mysql-%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96/",
+      "url"      : "https://zmngw.github.io/2023/09/02/MysqlQueryPerformance/",
       "keywords" : "Explain,MySql,查询优化"
     } ,
   
@@ -160,31 +152,39 @@
       "title"    : ".Net 基础知识汇总",
       "category" : "Net",
       
-      "url"      : "https://zmngw.github.io/2023/09/02/Net%E5%9F%BA%E7%A1%80/",
+      "url"      : "https://zmngw.github.io/2023/09/02/NetBasic/",
       "keywords" : "Net, C#"
     } ,
   
     {
-      "title"    : "Ridder和IDEA代码模板(Postfix)",
-      "category" : "Ridder",
+      "title"    : ".Net打包和发布",
+      "category" : "Net",
       
-      "url"      : "https://zmngw.github.io/2023/09/03/Ridder%E5%92%8CIDEA%E4%BB%A3%E7%A0%81%E6%A8%A1%E6%9D%BFPostfix-Completion/",
-      "keywords" : "Ridder, IDEA"
+      "url"      : "https://zmngw.github.io/2023/09/02/NetPackageAndPublish/",
+      "keywords" : "打包,发布,Net"
     } ,
   
     {
       "title"    : "Ridder和IDEA常用快捷键",
       "category" : "IDE",
       
-      "url"      : "https://zmngw.github.io/2023/09/03/Ridder%E5%92%8CIDEA%E5%B8%B8%E7%94%A8%E5%BF%AB%E6%8D%B7%E9%94%AE/",
+      "url"      : "https://zmngw.github.io/2023/09/03/RidderAndIDEAKey/",
       "keywords" : "Ridder, IDEA,快捷键"
+    } ,
+  
+    {
+      "title"    : "Ridder和IDEA代码模板(Postfix)",
+      "category" : "Ridder",
+      
+      "url"      : "https://zmngw.github.io/2023/09/03/RidderAndIDEATemplatePostfixCompletion/",
+      "keywords" : "Ridder, IDEA"
     } ,
   
     {
       "title"    : "MAUI学习笔记",
       "category" : "MAUI",
       
-      "url"      : "https://zmngw.github.io/2023/09/05/MAUI%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/",
+      "url"      : "https://zmngw.github.io/2023/09/05/MAUINote/",
       "keywords" : "MAUI, Net"
     } ,
   
@@ -192,7 +192,7 @@
       "title"    : ".Net 并发编程",
       "category" : "多线程",
       
-      "url"      : "https://zmngw.github.io/2023/09/09/.Net%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/",
+      "url"      : "https://zmngw.github.io/2023/09/09/Net%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/",
       "keywords" : "多线程, Net,异步"
     } ,
   
@@ -200,7 +200,7 @@
       "title"    : ".Net 并发编程（最佳实践）",
       "category" : "多线程",
       
-      "url"      : "https://zmngw.github.io/2023/09/09/.Net%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/",
+      "url"      : "https://zmngw.github.io/2023/09/09/Net%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/",
       "keywords" : "多线程, Net,异步"
     } ,
   
@@ -224,7 +224,7 @@
       "title"    : ".Net CQRS 服务基础框架 MyCloa",
       "category" : "Net",
       
-      "url"      : "https://zmngw.github.io/2023/10/09/.Net-CQRS%E6%9C%8D%E5%8A%A1%E5%9F%BA%E7%A1%80%E6%A1%86%E6%9E%B6/",
+      "url"      : "https://zmngw.github.io/2023/10/09/NetCQRS%E6%9C%8D%E5%8A%A1%E5%9F%BA%E7%A1%80%E6%A1%86%E6%9E%B6/",
       "keywords" : "Net, CQRS"
     } ,
   
@@ -240,7 +240,7 @@
       "title"    : "MySql 8.0 常用 hint",
       "category" : "mysql",
       
-      "url"      : "https://zmngw.github.io/2023/10/21/MySql-8.0-Hint/",
+      "url"      : "https://zmngw.github.io/2023/10/21/MySql8Hint/",
       "keywords" : "mysql, 优化"
     } ,
   

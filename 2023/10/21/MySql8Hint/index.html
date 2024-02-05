@@ -1,0 +1,315 @@
+<!DOCTYPE html><html lang="zh-cmn-Hans" prefix="og: http://ogp.me/ns#" class="han-init"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /><title>MySql 8.0 常用 hint &mdash; 码农感悟</title><link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/vendor/primer-css/css/primer.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/css/components/collection.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/css/components/repo-card.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/css/sections/repo-list.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/css/components/boxed-group.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/css/globals/common.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/css/globals/responsive.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/css/posts/index.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/vendor/octicons/octicons/octicons.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/mzlogin/rouge-themes@master/dist/github.css"><link rel="canonical" href="https://zmngw.github.io/2023/10/21/MySql8Hint/"><link rel="alternate" type="application/atom+xml" title="码农感悟" href="https://zmngw.github.io/feed.xml"><link rel="shortcut icon" href="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/favicon.ico"><meta property="og:title" content="MySql 8.0 常用 hint"><meta name="keywords" content="mysql, 优化"><meta name="og:keywords" content="mysql, 优化"><meta name="description" content="每个程序员都喜欢优化，甚至有时我们知道不应该去做。为了满足大家的意愿，MySQL提供了一些关键字，在SQL语句中使用这些关键字，可以使得数据库按照明确的优化指令执行SQL语句。"><meta name="og:description" content="每个程序员都喜欢优化，甚至有时我们知道不应该去做。为了满足大家的意愿，MySQL提供了一些关键字，在SQL语句中使用这些关键字，可以使得数据库按照明确的优化指令执行SQL语句。"><meta property="og:url" content="https://zmngw.github.io/2023/10/21/MySql8Hint/"><meta property="og:site_name" content="码农感悟"><meta property="og:type" content="article"><meta property="og:locale" content="zh_CN" /><meta property="article:published_time" content="2023-10-21"> <script src="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/vendor/jquery/dist/jquery.min.js"></script> <script src="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/js/main.js"></script></head><body class="" data-mz=""><header class="site-header"><div class="container"><h1><a href="https://zmngw.github.io/" title="码农感悟"><span class="octicon octicon-mark-github"></span> 码农感悟</a></h1><button class="collapsed mobile-visible" type="button" onclick="toggleMenu();"> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button><nav class="site-header-nav" role="navigation"> <a href="https://zmngw.github.io/" class="site-header-nav-item" target="" title="首页">首页</a> <a href="https://zmngw.github.io/categories/" class="site-header-nav-item" target="" title="分类">分类</a> <a href="https://zmngw.github.io/archives/" class="mobile-hidden site-header-nav-item" target="" title="归档">归档</a> <a href="https://zmngw.github.io/open-source/" class="mobile-hidden site-header-nav-item" target="" title="开源">开源</a> <a href="https://zmngw.github.io/fragments/" class="site-header-nav-item" target="" title="片段">片段</a> <a href="https://zmngw.github.io/wiki/" class="site-header-nav-item" target="" title="维基">维基</a> <a href="https://zmngw.github.io/links/" class="mobile-hidden site-header-nav-item" target="" title="链接">链接</a> <a href="https://zmngw.github.io/about/" class="site-header-nav-item" target="" title="关于">关于</a> <a class="mobile-hidden" href="https://zmngw.github.io/feed.xml"><span class="octicon octicon-rss" style="color:orange;"></span></a></nav></div></header><section class="collection-head small geopattern" data-pattern-id="MySql 8.0 常用 hi"><div class="container"><div class="columns"><div class="column three-fourths"><div class="collection-title"><h1 class="collection-header">MySql 8.0 常用 hint</h1><div class="collection-info"> <span class="meta-info"> <span class="octicon octicon-calendar"></span> 2023/10/21 </span> <span class="meta-info"> <span class="octicon octicon-file-directory"></span> <a href="https://zmngw.github.io/categories/#mysql" title="mysql">mysql</a> </span> <span class="meta-info"> <span class="octicon octicon-clock"></span> 共 23533 字，约 68 分钟 </span></div></div></div><div class="column one-fourth mobile-hidden"><div class="collection-title"> <img style="height:72px;width:72px" src="https://zmngw.github.io/assets/images/qrcode.jpg" alt="码农感悟" /></div></div></div></div></section><section class="container content"><div class="columns"><div class="column three-fourths" ><article class="article-content markdown-body"><p>每个程序员都喜欢优化，甚至有时我们知道不应该去做。为了满足大家的意愿，MySQL提供了一些关键字，在SQL语句中使用这些关键字，可以使得数据库按照明确的优化指令执行SQL语句。</p><p>应当指出的是，不正确的使用hints很有可能使你的查询语句表现的更糟糕，在使用hints之前需要确保这是有意义的。通常你可以使用explain查看执行计划并阅读hint文档来决定是否用它。</p><p>使用SQL注释括住hints也是一个好方法，比如</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="cm">/*+ SQL_NO_CACHE */</span> <span class="n">columns</span> <span class="k">FROM</span> <span class="k">table</span><span class="p">;</span>
+</code></pre></div></div><p>这可以使你的应用得到更大的兼容性。</p><p>下面介绍一些常用的MySQL优化hints。</p><h4 id="并行查询">并行查询</h4><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*+ PQ() */</span>
+<span class="cm">/*+ NO_PQ(t1,t2) */</span>
+</code></pre></div></div><h4 id="取消合并优化">取消合并优化</h4><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*+ no_merage() */</span>
+</code></pre></div></div><h4 id="指定主驱动表">指定主驱动表</h4><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*+ join_prefix(d) */</span>
+</code></pre></div></div><h4 id="sql_no_cache">SQL_NO_CACHE</h4><p>SQL_NO_CACHE hint 会使用特殊的查询来关闭MySQL内置的查询缓存机制。在动态性很强或者执行频率很低的查询上使用SQL_NO_CACHE hint，可以帮助MySQL提高缓存的使用效率。不过确保在使用SQL_NO_CACHE hint时，MySQL已经开启了查询缓存，否则没有必要使用。</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="n">SQL_NO_CACHE</span> <span class="n">field1</span><span class="p">,</span> <span class="n">field2</span> <span class="k">FROM</span> <span class="n">TABLE1</span><span class="p">;</span>
+</code></pre></div></div><h4 id="sql_cache">SQL_CACHE</h4><p>如果你已经配置了query_cache_type = 2(仅在使用SQL_CACHE时进行缓冲)，那么可以使用SQL_CACHE hint来告诉MySQL哪些查询需要进行缓存。</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="n">SQL_CALHE</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">TABLE1</span><span class="p">;</span>
+</code></pre></div></div><h4 id="high_priority">HIGH_PRIORITY</h4><p>在SELECT 或者 INSERT语句中使用 HIGH_PRIORITY hint可以告诉MySQL这是一个高优先级的查询。这个hint允许此查询跳过优先级较低的语句而得到优先执行。</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="n">HIGH_PRIORITY</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">TABLE1</span><span class="p">;</span>
+</code></pre></div></div><h4 id="low_priority">LOW_PRIORITY</h4><p>LOW_PRIORITY hint 可以使用在INSERT 和 UPDATE语句中.如果你使用LOW_PRIORITY 关键字，语句的执行会被延迟到没有其他的读请求时才执行。这意味着你可能等待很长一段时间，甚至在读请求为主的服务器上发生永久等待。</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">update</span> <span class="n">LOW_PRIORITY</span> <span class="n">table1</span> <span class="k">set</span> <span class="n">field1</span><span class="o">=</span><span class="n">foo</span> <span class="k">where</span> <span class="n">field1</span><span class="o">=</span><span class="n">bar</span><span class="p">;</span>
+</code></pre></div></div><h4 id="insert-delayed">INSERT DELAYED</h4><p>一个INSERT LOW_PRIORITY 语句在其得到真正执行之前，不会做任何返回，如果你想立即获得返回值，可以使用INSERT DELAYED 语句。INSERT DELAYED 语句会立即返回，但是依然等到其他客户端关闭了数据表后才执行。</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INSERT</span> <span class="n">DELAYED</span> <span class="k">INTO</span> <span class="n">table1</span> <span class="k">values</span><span class="p">(</span><span class="n">xxx</span><span class="p">);</span>
+</code></pre></div></div><p>关于MySQL Insert Delayed的更多信息可以查看这里</p><p>注意：INSERT DELAYED 只作用于MyISAM、MEMORY和ARCHIVE表。</p><h4 id="straight_join">STRAIGHT_JOIN</h4><p>STRAIGHT_JOIN hint告诉MySQL使用FROM从句的顺序来进行表连接。</p><p>使用EXPLAIN 来明确MySQL没有指出这个最佳的连接顺序。如果你指定了一个不佳的顺序，可能会使MySQL做很多无需做的工作。</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="n">TABLE1</span><span class="p">.</span><span class="n">FIELD1</span><span class="p">,</span> <span class="n">TABLE2</span><span class="p">.</span><span class="n">FIELD2</span> <span class="k">FROM</span> <span class="n">TABLE1</span> <span class="n">STRAIGHT_JOIN</span> <span class="n">TABLE2</span> <span class="k">WHERE</span> <span class="n">xxx</span><span class="p">;</span>
+</code></pre></div></div><h4 id="sql_buffer_result">SQL_BUFFER_RESULT</h4><p>SQL_BUFFER_RESULT hint告诉MySQL将查询的结果放入到临时表中，这样当查询结果还在输出时,就可以解除锁定的数据表。因此你可能只需要在结果集很大的时候使用SQL_BUFFER_RESULT hint。</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="n">SQL_BUFFER_RESULT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">TABLE1</span> <span class="k">WHERE</span><span class="p">;</span>
+</code></pre></div></div><h4 id="sql_big_result">SQL_BIG_RESULT</h4><p>SQL_BIG_RESULT hint 能够与DISTINCT 和 GROUP BY SELECT 语句一起使用，它会告诉MySQL结果集可能会很大。根据MySQL文档，如果使用了这个hint，那么在需要时，MySQL会直接使用磁盘临时表，并且使用GROUP BY的元素关键字对临时表进行排序。</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="n">SQL_BIG_RESULT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">TABLE1</span> <span class="k">WHERE</span><span class="p">;</span>
+</code></pre></div></div><h4 id="sql_small_result">SQL_SMALL_RESULT</h4><p>SQL_SMALL_RESULT基本上与SQL_BIG_RESULT相反。当使用了SQL_SMALL_RESULT时，MySQL使用内存临时表来存储结果而不会进行非索引排序。因此通常这是默认的优化选项，这个hint通常无需使用。</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="n">SQL_SMALL_RESULT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">TABLE1</span> <span class="k">WHERE</span><span class="p">;</span>
+</code></pre></div></div><h4 id="force-index">FORCE INDEX</h4><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">TABLE1</span> <span class="k">FORCE</span> <span class="k">INDEX</span> <span class="p">(</span><span class="n">FIELD1</span><span class="p">);</span>
+</code></pre></div></div><p>以上的SQL语句只使用建立在FIELD1上的索引，而不使用其它字段上的索引。</p><h4 id="ignore-index">IGNORE INDEX</h4><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">TABLE1</span> <span class="k">IGNORE</span> <span class="k">INDEX</span> <span class="p">(</span><span class="n">FIELD1</span><span class="p">,</span> <span class="n">FIELD2</span><span class="p">);</span>
+</code></pre></div></div><p>在上面的SQL语句中，TABLE1表中FIELD1和FIELD2上的索引不被使用。</p><h4 id="join-order-optimizer-hints-连接顺序相关的">Join-Order Optimizer Hints –连接顺序相关的</h4><p>预先创建2张表</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; create table tt1 (id int not null primary key, name varchar(20));
+Query OK, 0 rows affected (0.01 sec)
+
+
+mysql&gt; create table tt2 (id int not null primary key, name varchar(20));
+Query OK, 0 rows affected (0.02 sec)
+
+
+mysql&gt; insert into tt1 values (1,'tt1');
+Query OK, 1 row affected (0.00 sec)
+
+
+mysql&gt; insert into tt2 values (1,'tt2');
+Query OK, 1 row affected (0.00 sec)
+</code></pre></div></div><p>我们先看着几个hint :</p><ul><li>JOIN_ORDER: 指定表的连接顺序</li><li>JOIN_PREFIX: 设定第一个表顺序(主驱动表)</li><li>JOIN_SUFFIX: 设定最后一个表的顺序</li><li>JOIN_FIXED_ORDER: 按照SQL写的<strong>顺序连接</strong> 类似于 STRAIGHT_JOIN</li></ul><p>JOIN_ORDER：，来固定表的连接顺序 <code class="language-plaintext highlighter-rouge">tt2-&gt;tt1</code></p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">explain</span> <span class="k">select</span> <span class="cm">/*+ join_order(tt2,tt1) */</span> <span class="n">tt1</span><span class="p">.</span><span class="o">*</span><span class="p">,</span><span class="n">tt2</span><span class="p">.</span><span class="o">*</span> <span class="k">from</span> <span class="n">tt1</span><span class="p">,</span><span class="n">tt2</span> <span class="k">where</span> <span class="n">tt1</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span><span class="n">tt2</span><span class="p">.</span><span class="n">id</span>
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt2   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt1   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt2.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 1 warning (0.01 sec)
+</code></pre></div></div><p>我们再次反过来， 来固定表的连接顺序 tt1-&gt;tt2</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">explain</span> <span class="k">select</span> <span class="cm">/*+ join_order(tt1,tt2) */</span> <span class="n">tt1</span><span class="p">.</span><span class="o">*</span><span class="p">,</span><span class="n">tt2</span><span class="p">.</span><span class="o">*</span> <span class="k">from</span> <span class="n">tt1</span><span class="p">,</span><span class="n">tt2</span> <span class="k">where</span> <span class="n">tt1</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span><span class="n">tt2</span><span class="p">.</span><span class="n">id</span>
+<span class="c1">--------------</span>
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt1   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt2   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt1.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>JOIN_PREFIX: 设定第一个表(主驱动表)顺序 ， 我们来固定 tt2 作为驱动表</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">explain</span> <span class="k">select</span> <span class="cm">/*+ JOIN_PREFIX(tt2) */</span> <span class="n">tt1</span><span class="p">.</span><span class="o">*</span><span class="p">,</span><span class="n">tt2</span><span class="p">.</span><span class="o">*</span> <span class="k">from</span> <span class="n">tt1</span><span class="p">,</span><span class="n">tt2</span> <span class="k">where</span> <span class="n">tt1</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span><span class="n">tt2</span><span class="p">.</span><span class="n">id</span>
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt2   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt1   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt2.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>JOIN_SUFFIX： 设定最后一个表的顺序， 我们来固定 tt2 作为被驱动表</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">explain</span> <span class="k">select</span><span class="cm">/*+ JOIN_SUFFIX(tt2) */</span> <span class="n">tt1</span><span class="p">.</span><span class="o">*</span><span class="p">,</span><span class="n">tt2</span><span class="p">.</span><span class="o">*</span> <span class="k">from</span> <span class="n">tt1</span><span class="p">,</span><span class="n">tt2</span> <span class="k">where</span> <span class="n">tt1</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span><span class="n">tt2</span><span class="p">.</span><span class="n">id</span>
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt1   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt2   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt1.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>JOIN_FIXED_ORDER: 按照SQL写的顺序连接 类似于 STRAIGHT_JOIN ， 是按照where 语句后面SQL写的顺序，来连接。</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from tt1,tt2 --》 tt1连tt2
+from tt2,tt1 --》 tt2连tt1
+
+root@localhost:mysql_uatDB.sock [testdb]&gt; explain select /*+ JOIN_FIXED_ORDER*/ tt1.*,tt2.* from tt1,tt2 where tt1.id =tt2.id;
+
+--------------
+explain select /*+ JOIN_FIXED_ORDER */ tt1.*,tt2.* from tt1,tt2 where tt1.id =tt2.id
+--------------
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt1   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt2   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt1.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 2 warnings (0.00 sec)
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@localhost:mysql_uatDB.sock [testdb]&gt; explain select/*+ JOIN_FIXED_ORDER */ tt1.*,tt2.* from tt2,tt1 where tt1.id =tt2.id;
+--------------
+explain  select/*+ JOIN_FIXED_ORDER */ tt1.*,tt2.* from tt2,tt1 where tt1.id =tt2.id
+--------------
+
+
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt2   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt1   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt2.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 2 warnings (0.01 sec)
+</code></pre></div></div><h4 id="index-level-optimizer-hints-索引级别的">Index-Level Optimizer Hints –索引级别的</h4><p>我们继续看一下索引级别的几个hint:</p><ul><li>INDEX, NO_INDEX: 指定固定的索引访问</li><li>INDEX_MERGE, NO_INDEX_MERGE: 指定索引之间是否进行交，并集的操作</li><li>JOIN_INDEX, NO_JOIN_INDEX： 指定表连接之间是否是走索引连接</li><li>MRR, NO_MRR: 是否启用multiple range read</li><li>NO_ICP: 关闭索引下推</li><li>NO_RANGE_OPTIMIZATION: 关闭索引范围的扫描</li><li>ORDER_INDEX, NO_ORDER_INDEX: 是否通过指定的索引来排序</li><li>SKIP_SCAN, NO_SKIP_SCAN: 是否进行索引的跳跃扫描</li></ul><p>INDEX, NO_INDEX: 是否指定固定的索引访问 ：</p><p>我们来看一下这条语句：</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>explain select * from t2 where id &gt; 10 and a &gt;20;
+</code></pre></div></div><p>很显然走主键索引是最正确的选择 -&gt; （PRIMARY）</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@localhost:mysql_uatDB.sock [testdb]&gt; explain select  *  from t2 where id &gt; 10 and a &gt;20;
+--------------
+explain select  *  from t2 where id &gt; 10 and a &gt;20
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+| id | select_type | table | partitions | type  | possible_keys | key     | key_len | ref  | rows   | filtered | Extra       |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+|  1 | SIMPLE      | t2    | NULL       | range | PRIMARY,a     | PRIMARY | 4       | NULL | 499193 |    50.00 | Using where |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>我们还可以通过hint -&gt; <code class="language-plaintext highlighter-rouge">/*+ index(t2 a) */</code> 让MYSQL优化器走索引 a, 虽然这不是优化器最优的选择：</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@localhost:mysql_uatDB.sock [testdb]&gt; explain select/*+ index(t2 a) */  *  from t2 where id &gt; 10 and a &gt;20;
+--------------
+explain select/*+ index(t2 a) */  *  from t2 where id &gt; 10 and a &gt;20
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+--------+----------+-----------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows   | filtered | Extra                 |
++----+-------------+-------+------------+-------+---------------+------+---------+------+--------+----------+-----------------------+
+|  1 | SIMPLE      | t2    | NULL       | range | a             | a    | 5       | NULL | 499193 |    33.33 | Using index condition |
++----+-------------+-------+------------+-------+---------------+------+---------+------+--------+----------+-----------------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>或者我们还可以通过 NO_INDEX(PRIMARY) 让MYSQL不强制走主键索引树。 这次MYSQL选择了全表扫描 ： ALL</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@localhost:mysql_uatDB.sock [testdb]&gt; explain select/*+ no_index(t2 PRIMARY) */  *  from t2 where id &gt; 10 and a &gt;20;
+--------------
+explain select/*+ no_index(t2 PRIMARY) */  *  from t2 where id &gt; 10 and a &gt;20
+--------------
+
+
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows   | filtered | Extra       |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+|  1 | SIMPLE      | t2    | NULL       | ALL  | a             | NULL | NULL    | NULL | 998386 |    16.66 | Using where |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>INDEX_MERGE, NO_INDEX_MERGE: 表示是否指定不同的索引之间的交集或者并集</p><p>一般情况下情况下：</p><ul><li>where 条件中 使用了 AND 例如 a = 1 and b =1 一般会触发index merge的 交集</li><li>where 条件中 使用了 OR 例如 a = 1 or b =1 一般会触发index merge的 并集</li></ul><p>我们看一下例子： <code class="language-plaintext highlighter-rouge">where (t2.id &gt; 10 OR t2.a &lt; 1000) AND t2.a &lt; 10000</code> 这个是触发了索引之间的 sort_union(a,PRIMARY) 交集 也就是说 索引 a和主键 PRIMARY的 soft_union 去重合并的操作</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>explain select /*+ index_merge(t2 a,PRIMARY) */ * from t2 where (t2.id &gt; 10 OR  t2.a &lt; 1000) AND  t2.a &lt; 10000
+
+
++----+-------------+-------+------------+-------------+---------------+-----------+---------+------+--------+----------+------------------------------------------+
+| id | select_type | table | partitions | type        | possible_keys | key       | key_len | ref  | rows   | filtered | Extra                                    |
++----+-------------+-------+------------+-------------+---------------+-----------+---------+------+--------+----------+------------------------------------------+
+|  1 | SIMPLE      | t2    | NULL       | index_merge | PRIMARY,a     | a,PRIMARY | 5,4     | NULL | 500192 |   100.00 | Using sort_union(a,PRIMARY); Using where |
++----+-------------+-------+------------+-------------+---------------+-----------+---------+------+--------+----------+------------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>我们再来看一个例子： <code class="language-plaintext highlighter-rouge">where t2.b = 1 AND t2.a =2;</code> 这个是触发了索引之间的 Using intersect(a,idx_b) 并集操作 也就是说 索引 a和 索引idx_b 进行了 交集的操作</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>explain select/*+ index_merge(t2 idx_b,a)*/ * from t2 where t2.b = 1  AND  t2.a =2
+
+
+
++----+-------------+-------+------------+-------------+---------------+---------+---------+------+------+----------+----------------------------------------------------+
+| id | select_type | table | partitions | type        | possible_keys | key     | key_len | ref  | rows | filtered | Extra                                              |
++----+-------------+-------+------------+-------------+---------------+---------+---------+------+------+----------+----------------------------------------------------+
+|  1 | SIMPLE      | t2    | NULL       | index_merge | a,idx_b       | a,idx_b | 5,5     | NULL |    1 |   100.00 | Using intersect(a,idx_b); Using where; Using index |
++----+-------------+-------+------------+-------------+---------------+---------+---------+------+------+----------+----------------------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>JOIN_INDEX, NO_JOIN_INDEX： 指定表连接之间是否是走索引连接</p><p>我们可以看到 在使用了 hint /* +NO_JOIN_INDEX(t2 idx_b) */ 之后，表 t1,t2 的连接方式 从原来的 index nested loop join 改成了 hash join</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@localhost:mysql_uatDB.sock [testdb]&gt; explain select * from t1,t2 where t1.b = t2.b ;
+--------------
+explain select * from t1,t2 where t1.b = t2.b
+--------------
+
+
++----+-------------+-------+------------+------+---------------+-------+---------+-------------+------+----------+-------------+
+| id | select_type | table | partitions | type | possible_keys | key   | key_len | ref         | rows | filtered | Extra       |
++----+-------------+-------+------------+------+---------------+-------+---------+-------------+------+----------+-------------+
+|  1 | SIMPLE      | t1    | NULL       | ALL  | NULL          | NULL  | NULL    | NULL        | 1000 |   100.00 | Using where |
+|  1 | SIMPLE      | t2    | NULL       | ref  | idx_b         | idx_b | 5       | testdb.t1.b |    1 |   100.00 | NULL        |
++----+-------------+-------+------------+------+---------------+-------+---------+-------------+------+----------+-------------+
+2 rows in set, 1 warning (0.00 sec)
+
+
+root@localhost:mysql_uatDB.sock [testdb]&gt; explain select/*+ NO_JOIN_INDEX(t2 idx_b) */ * from t1,t2 where t1.b = t2.b ;
+--------------
+explain select/*+ NO_JOIN_INDEX(t2 idx_b) */ * from t1,t2 where t1.b = t2.b
+--------------
+
+
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+--------------------------------------------+
+| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows   | filtered | Extra                                      |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+--------------------------------------------+
+|  1 | SIMPLE      | t1    | NULL       | ALL  | NULL          | NULL | NULL    | NULL |   1000 |   100.00 | NULL                                       |
+|  1 | SIMPLE      | t2    | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 998386 |     0.00 | Using where; Using join buffer (hash join) |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+--------------------------------------------+
+2 rows in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>MRR, NO_MRR: 是否启用multiple range read :</p><p>MRR 原理为 <a href="https://www.modb.pro/db/365827">参考</a>:</p><blockquote><p>MRR的简单的原理如图： 1）会把二级索引扫描到数据放到内存中 2）在内存中按照ID的顺序进行排序， 这个内存的大小由参数 read_rnd_buffer_size 控制 3）根据排序好得ID 顺序读取表的索引树</p></blockquote><p>目前我们可以通过2种方式使用MRR：</p><p>1） set optimizer_switch = “mrr_cost_based=off”;</p><p>2）hint mrr</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@localhost:mysql_uatDB.sock [testdb]&gt; set optimizer_switch =  "mrr_cost_based=off";
+--------------
+set optimizer_switch =  "mrr_cost_based=off"
+--------------
+
+
+Query OK, 0 rows affected (0.00 sec)
+
+
+root@localhost:mysql_uatDB.sock [testdb]&gt; explain  select  * from t1 where a &gt; 20 and a &lt; 200;
+--------------
+explain  select  * from t1 where a &gt; 20 and a &lt; 200
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra                  |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+|  1 | SIMPLE      | t1    | NULL       | range | a             | a    | 5       | NULL |  179 |   100.00 | Using where; Using MRR |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+
+root@localhost:mysql_uatDB.sock [testdb]&gt; explain  select/*+mrr(t1)*/ * from t1 where a &gt; 20 and a &lt; 200;
+--------------
+explain  select/*+mrr(t1)*/ * from t1 where a &gt; 20 and a &lt; 200
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra                  |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+|  1 | SIMPLE      | t1    | NULL       | range | a             | a    | 5       | NULL |  179 |   100.00 | Using where; Using MRR |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>NO_ICP: 关闭索引下推 索引下推 在实行计划里面对应的是 Using index condition</p><p>我们来看一个例子： a索引会在innodb 的存储引擎层进行 id &gt; 10的过滤 再将最终的结果返回给mysql server</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>explain select * from t2 where t2.id &gt; 10 and t2.a &lt; 1000
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra                 |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+|  1 | SIMPLE      | t2    | NULL       | range | PRIMARY,a     | a    | 5       | NULL |  999 |    50.00 | Using index condition |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>我们使用 NO_ICP 尝试一下： 果然索引下推没有了，改为了 Using where 表示需要在mysql server的内存中对ID的值进行过滤</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@localhost:mysql_uatDB.sock [testdb]&gt; explain select/*+ no_icp(t2) */ * from t2 where t2.id &gt; 10 and t2.a &lt; 1000;
+--------------
+explain select/*+ no_icp(t2) */ * from t2 where t2.id &gt; 10 and t2.a &lt; 1000
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra       |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-------------+
+|  1 | SIMPLE      | t2    | NULL       | range | PRIMARY,a     | a    | 5       | NULL |  999 |    50.00 | Using where |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>NO_RANGE_OPTIMIZATION: 关闭索引范围的扫描</p><p>我们来看一个例子 本来是 t2表走的是索引范围的扫描，t2.a &gt; 10 and t2.a &lt; 10000; 加上hint /*+ NO_RANGE_OPTIMIZATION(t2 a) */ 之后，弃用了索引范围访问，改为了全表扫描</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@localhost:mysql_uatDB.sock [testdb]&gt; explain select * from t2 where t2.a &gt; 10 and t2.a &lt; 10000;
+--------------
+explain select * from t2 where t2.a &gt; 10 and t2.a &lt; 10000
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra                 |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+|  1 | SIMPLE      | t2    | NULL       | range | a             | a    | 5       | NULL | 9989 |   100.00 | Using index condition |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+root@localhost:mysql_uatDB.sock [testdb]&gt; expalin select/*+ NO_RANGE_OPTIMIZATION(t2 a) */ * from t2 where t2.a &gt; 10 and t2.a &lt; 10000;
+--------------
+desc select/*+ NO_RANGE_OPTIMIZATION(t2 a) */ * from t2 where t2.a &gt; 10 and t2.a &lt; 10000
+--------------
+
+
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows   | filtered | Extra       |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+|  1 | SIMPLE      | t2    | NULL       | ALL  | a             | NULL | NULL    | NULL | 998386 |    11.11 | Using where |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>ORDER_INDEX, NO_ORDER_INDEX: 是否通过指定的索引来排序</p><p>我们来看这个例子中， where t2.a &gt; 10 and t2.a &lt; 10000 order by b; 走的是 a 列的索引，然后在进行ID的排序操作</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@localhost:mysql_uatDB.sock [testdb]&gt; explain select  * from t2 where t2.a &gt; 10 and t2.a &lt; 10000 order by b;
+--------------
+explain select  * from t2 where t2.a &gt; 10 and t2.a &lt; 10000 order by b
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+---------------------------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra                                 |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+---------------------------------------+
+|  1 | SIMPLE      | t2    | NULL       | range | a             | a    | 5       | NULL | 9989 |   100.00 | Using index condition; Using filesort |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+---------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>我们尝试加个 hint /*+ ORDER_INDEX(t2 PRIMARY) */ 强制走主键ID的排序 我们看到MYSQL的优化器改成了走主键索引， 这样就可以用到了 主键索引树的排序。</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@localhost:mysql_uatDB.sock [testdb]&gt; explain select/*+ORDER_INDEX(t2 PRIMARY)*/  * from t2 where t2.a &gt; 10 and t2.a &lt; 10000 order by id;
+--------------
+explain select/*+ORDER_INDEX(t2 PRIMARY)*/  * from t2 where t2.a &gt; 10 and t2.a &lt; 10000 order by id
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+| id | select_type | table | partitions | type  | possible_keys | key     | key_len | ref  | rows   | filtered | Extra       |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+|  1 | SIMPLE      | t2    | NULL       | index | NULL          | PRIMARY | 4       | NULL | 998386 |    11.11 | Using where |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>SKIP_SCAN, NO_SKIP_SCAN: 是否进行索引的跳跃扫描</p><p>熟悉oracle 的小伙伴 都应该知道当索引是多键值复合索引的时候，当索引的第一列如果在WHERE 条件中不能够有效的触发的话，ORACLE 大爷的优化器会选择 index skip scan . 同样的 mysql叔的优化器也是从version 8.0.13版本开始，也会有索引 skip scan这种方式。</p><p>我们采用官方文档的用例：</p><div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">t1</span> <span class="p">(</span><span class="n">f1</span> <span class="nb">INT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span> <span class="n">f2</span> <span class="nb">INT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">));</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">t1</span> <span class="k">VALUES</span>
+  <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
+  <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">);</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">t1</span> <span class="k">SELECT</span> <span class="n">f1</span><span class="p">,</span> <span class="n">f2</span> <span class="o">+</span> <span class="mi">5</span> <span class="k">FROM</span> <span class="n">t1</span><span class="p">;</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">t1</span> <span class="k">SELECT</span> <span class="n">f1</span><span class="p">,</span> <span class="n">f2</span> <span class="o">+</span> <span class="mi">10</span> <span class="k">FROM</span> <span class="n">t1</span><span class="p">;</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">t1</span> <span class="k">SELECT</span> <span class="n">f1</span><span class="p">,</span> <span class="n">f2</span> <span class="o">+</span> <span class="mi">20</span> <span class="k">FROM</span> <span class="n">t1</span><span class="p">;</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">t1</span> <span class="k">SELECT</span> <span class="n">f1</span><span class="p">,</span> <span class="n">f2</span> <span class="o">+</span> <span class="mi">40</span> <span class="k">FROM</span> <span class="n">t1</span><span class="p">;</span>
+<span class="k">ANALYZE</span> <span class="k">TABLE</span> <span class="n">t1</span><span class="p">;</span>
+</code></pre></div></div><p>我们来测试一下： WHERE f2 &gt; 40 ， 主键为复合索引（f1,f2）, 当前只有 f2这个列来触发。 我们可以看到了 索引扫描 进行了 skip scan (Using index for skip scan)</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>EXPLAIN SELECT f1, f2 FROM t1 WHERE f2 &gt; 40
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+----------------------------------------+
+| id | select_type | table | partitions | type  | possible_keys | key     | key_len | ref  | rows | filtered | Extra                                  |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+----------------------------------------+
+|  1 | SIMPLE      | t1    | NULL       | range | PRIMARY       | PRIMARY | 8       | NULL |   53 |   100.00 | Using where; Using index for skip scan |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+----------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>我们同样可以用hint NO_SKIP_SCAN 来关闭 skip scan 这种索引跳跃的扫描方式。</p><p>可以看到了 索引改成了普通的扫描</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@localhost:mysql_uatDB.sock [sbtest]&gt; EXPLAIN SELECT/*+no_skip_scan(t1 PRIMARY)*/ f1, f2 FROM t1 WHERE f2 &gt; 40;
+--------------
+EXPLAIN SELECT/*+no_skip_scan(t1 PRIMARY)*/ f1, f2 FROM t1 WHERE f2 &gt; 40
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+--------------------------+
+| id | select_type | table | partitions | type  | possible_keys | key     | key_len | ref  | rows | filtered | Extra                    |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+--------------------------+
+|  1 | SIMPLE      | t1    | NULL       | index | NULL          | PRIMARY | 8       | NULL |  160 |    33.33 | Using where; Using index |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+--------------------------+
+1 row in set, 1 warning (0.00 sec)
+</code></pre></div></div><p>总结一下文本介绍了2大类型的HINT：</p><p>1)Join-Order Optimizer Hints –连接顺序相关的</p><ul><li>JOIN_ORDER: 指定表的连接顺序</li><li>JOIN_PREFIX: 设定第一个表顺序</li><li>JOIN_SUFFIX: 设定最后一个表的顺序</li><li>JOIN_FIXED_ORDER: 按照SQL写的顺序连接 类似于 STRAIGHT_JOIN</li></ul><p>2)Index-Level Optimizer Hints –索引级别的</p><ul><li>INDEX, NO_INDEX: 指定固定的索引访问</li><li>INDEX_MERGE, NO_INDEX_MERGE: 指定索引之间是否进行交，并集的操作</li><li>JOIN_INDEX, NO_JOIN_INDEX： 指定表连接之间是否是走索引连接</li><li>MRR, NO_MRR: 是否启用multiple range read</li><li>NO_ICP: 关闭索引下推</li><li>NO_RANGE_OPTIMIZATION: 关闭索引范围的扫描</li><li>ORDER_INDEX, NO_ORDER_INDEX: 是否通过指定的索引来排序</li><li>SKIP_SCAN, NO_SKIP_SCAN: 是否进行索引的跳跃扫描</li></ul><p>参考文档 <a href="https://dev.mysql.com/doc/refman/8.0/en/optimizer-hints.html">官方文档</a></p><div style="margin-top:2em;padding:0 1.5em;border:1px solid #d3d3d3;background-color:#deebf7"><h3>文档信息</h3><ul><li>本文作者：<a href="https://zmngw.github.io" target="_blank">zhoubin</a></li><li>本文链接：<a href="https://zmngw.github.io/2023/10/21/MySql8Hint/" target="_blank">https://zmngw.github.io/2023/10/21/MySql8Hint/</a></li><li>版权声明：自由转载-非商用-非衍生-保持署名（<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh" target="_blank">创意共享3.0许可证</a>）</li></ul></div></article><div class="share"></div><div class="comment"> <script src="https://giscus.app/client.js" data-repo="usteinfo/blog-comments" data-repo-id="R_kgDOKL8L_A" data-category="Announcements" data-category-id="DIC_kwDOKL8L_M4CY4xg" data-mapping="title" data-strict="1" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="zh-CN" data-loading="lazy" crossorigin="anonymous" async> </script></div></div><div class="column one-fourth"><h3>Search</h3><div id="site_search"> <input style="width:96%" type="text" id="search_box" placeholder="Search"></div><ul id="search_results" style="font-size:14px;list-style-type:none;padding-top:10px;padding-left:10px;"></ul><script src="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/js/simple-jekyll-search.min.js"></script> <script type="text/javascript"> SimpleJekyllSearch({ searchInput: document.getElementById('search_box'), resultsContainer: document.getElementById('search_results'), json: 'https://zmngw.github.io/assets/search_data.json?v=1707143074', searchResultTemplate: '<li><a href="{url}" title="{title}">{title}</a></li>', noResultsText: 'No results found', limit: 10, fuzzy: false, exclude: ['Welcome'] }) </script><h3 class="post-directory-title mobile-hidden">Table of Contents</h3><div id="post-directory-module" class="mobile-hidden"><section class="post-directory"><dl></dl></section></div><script src="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/js/jquery.toc.js"></script></div></div></section><footer class="container"><div class="site-footer" role="contentinfo"><div class="copyright left mobile-block"> © 2023 <span title="zhoubin">zhoubin</span> <a href="javascript:window.scrollTo(0,0)" class="right mobile-visible">TOP</a></div><ul class="site-footer-links right mobile-hidden"><li> <a href="javascript:window.scrollTo(0,0)" >TOP</a></li></ul><a href="https://github.com/usteinfo/usteinfo.github.io" target="_blank" aria-label="view source code"> <span class="mega-octicon octicon-mark-github" title="GitHub"></span> </a><ul class="site-footer-links mobile-hidden"><li> <a href="https://zmngw.github.io/" title="首页" target="">首页</a></li><li> <a href="https://zmngw.github.io/categories/" title="分类" target="">分类</a></li><li> <a href="https://zmngw.github.io/archives/" title="归档" target="">归档</a></li><li> <a href="https://zmngw.github.io/open-source/" title="开源" target="">开源</a></li><li> <a href="https://zmngw.github.io/fragments/" title="片段" target="">片段</a></li><li> <a href="https://zmngw.github.io/wiki/" title="维基" target="">维基</a></li><li> <a href="https://zmngw.github.io/links/" title="链接" target="">链接</a></li><li> <a href="https://zmngw.github.io/about/" title="关于" target="">关于</a></li><li><a href="https://zmngw.github.io/feed.xml"><span class="octicon octicon-rss" style="color:orange;"></span></a></li></ul><script async src="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/vendor/busuanzi/2.3/busuanzi.pure.mini.js"></script><div class="mobile-hidden" style="margin-top:8px"> <span id="busuanzi_container_site_pv" style="display:none"> 本站访问量<span id="busuanzi_value_site_pv"></span>次 </span> <span id="busuanzi_container_site_uv" style="display:none"> / 本站访客数<span id="busuanzi_value_site_uv"></span>人 </span> <span id="busuanzi_container_page_pv" style="display:none"> / 本页访问量<span id="busuanzi_value_page_pv"></span>次 / 统计始于2023-09-02 </span></div></div></footer><div class="tools-wrapper"> <a class="gotop" href="#" title="回到顶部"><span class="octicon octicon-arrow-up"></span></a></div><script src="https://fastly.jsdelivr.net/gh/usteinfo/usteinfo.github.io@master/assets/js/geopattern.js"></script> <script> jQuery(document).ready(function($) { $('.geopattern').each(function(){ $(this).geopattern($(this).data('pattern-id')); }); /* hljs.initHighlightingOnLoad(); */ }); </script></body></html>
