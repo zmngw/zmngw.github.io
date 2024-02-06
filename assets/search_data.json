@@ -112,7 +112,7 @@
       "title"    : "开篇",
       "category" : "技术",
       
-      "url"      : "https://zmngw.github.io/2023/08/27/%E5%BC%80%E7%AF%87.md.saved/",
+      "url"      : "https://zmngw.github.io/2023/08/27/%E5%BC%80%E7%AF%87.md.saved.bak/",
       "keywords" : "人生, 感悟"
     } ,
   
@@ -154,14 +154,6 @@
       
       "url"      : "https://zmngw.github.io/2023/09/02/Mysql-%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96/",
       "keywords" : "Explain,MySql,查询优化"
-    } ,
-  
-    {
-      "title"    : ".Net 基础知识汇总",
-      "category" : "Net",
-      
-      "url"      : "https://zmngw.github.io/2023/09/02/Net%E5%9F%BA%E7%A1%80/",
-      "keywords" : "Net, C#"
     } ,
   
     {
@@ -346,6 +338,14 @@
       
       "url"      : "https://zmngw.github.io/fragment/2023-12-14%20VSFarmworkVersion/",
       "keywords" : "VisualStudio, .NET"
+    } ,
+  
+    {
+      "title"    : "控制台应用中使用DataAnnotation验证模型",
+      "category" : "",
+      
+      "url"      : "https://zmngw.github.io/fragment/2024-02-06%20ConsoleUseDataAnnotation/",
+      "keywords" : ".NET"
     } ,
   
     {
