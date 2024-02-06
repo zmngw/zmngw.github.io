@@ -112,6 +112,14 @@
       "title"    : "开篇",
       "category" : "技术",
       
+      "url"      : "https://zmngw.github.io/2023/08/27/%E5%BC%80%E7%AF%87.md.saved/",
+      "keywords" : "人生, 感悟"
+    } ,
+  
+    {
+      "title"    : "开篇",
+      "category" : "技术",
+      
       "url"      : "https://zmngw.github.io/2023/08/27/%E5%BC%80%E7%AF%87.md.saved.bak/",
       "keywords" : "人生, 感悟"
     } ,
@@ -266,6 +274,14 @@
       
       "url"      : "https://zmngw.github.io/2023/12/14/IndicatorsAndLabels/",
       "keywords" : "数仓, 规范,指南,指标,标签"
+    } ,
+  
+    {
+      "title"    : "MySQL 常用数据类型和函数",
+      "category" : "mysql",
+      
+      "url"      : "https://zmngw.github.io/2024/02/06/mysqlchoosedatatype/",
+      "keywords" : "mysql, sql"
     } ,
   
     {
