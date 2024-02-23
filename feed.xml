@@ -1,0 +1,2594 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.3">Jekyll</generator><link href="https://zmngw.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://zmngw.github.io/" rel="alternate" type="text/html" /><updated>2024-02-23T21:49:26+08:00</updated><id>https://zmngw.github.io/feed.xml</id><title type="html">码农感悟</title><subtitle>zhoubin的个人博客，公众号：码农感悟</subtitle><author><name>zhoubin</name></author><entry><title type="html">Centos Linux配置网卡静态IP和开启SSH服务</title><link href="https://zmngw.github.io/2024/02/23/centosopenssh/" rel="alternate" type="text/html" title="Centos Linux配置网卡静态IP和开启SSH服务" /><published>2024-02-23T00:00:00+08:00</published><updated>2024-02-23T00:00:00+08:00</updated><id>https://zmngw.github.io/2024/02/23/centosopenssh</id><content type="html" xml:base="https://zmngw.github.io/2024/02/23/centosopenssh/">&lt;p&gt;重新安装系统，都需要配置网卡，同时方便远程连接，也会开启SSH服务。&lt;/p&gt;
+
+&lt;h3 id=&quot;网卡配置&quot;&gt;网卡配置&lt;/h3&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[root@localhost ~]# nmcli conn add type ethernet con-name ens33 ifname ens33
+Connection &apos;ens35&apos; (c32adfbd-b3fd-4484-a5d3-3b3f04cdfaa7) successfully added.
+
+[root@localhost ~]# nmcli conn mod ens33 ipv4.address 192.168.3.22/24
+[root@localhost ~]# nmcli conn mod ens33 ipv4.gateway 192.168.3.2
+[root@localhost ~]# nmcli conn mod ens33 ipv4.dns 192.168.3.2
+[root@localhost ~]# nmcli conn mod ens33 ipv4.method manual
+[root@localhost ~]# nmcli conn up ens33
+Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/27)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;安装ssh服务&quot;&gt;安装SSH服务&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;查看当前的centos是否安装了openssh-server服务。默认安装openssh-server服务。&lt;/p&gt;
+
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; rpm -qa|grep -E &quot;openssh&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;显示结果含有以下三个软件，则表示已经安装，否则需要安装缺失的软件&lt;/p&gt;
+
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; openssh-7.4p1-11.el7.x86_64
+ openssh-server-7.4p1-11.el7.x86_64
+ openssh-clients-7.4p1-11.el7.x86_64
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+
+    &lt;p&gt;如果存在这些文件，则可以跳过安装，直接进行远程连接。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;安装openssh-server服务&lt;/p&gt;
+
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; yum install openssh-server -y
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;配置OpenSSH服务(默认的配置已可以正常工作)&lt;/p&gt;
+
+    &lt;p&gt;OpenSSH的主配置文件：&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/ssh/sshd_config&lt;/code&gt;&lt;/p&gt;
+
+    &lt;p&gt;常见的配置选项：&lt;/p&gt;
+
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; Port=22  设置SSH的端口号是22(默认端口号为22)
+    
+ Protocol 2  启用SSH版本2协议
+    
+ ListenAddress 192.168.0.222  设置服务监听的地址
+    
+ DenyUsers   user1 user2 foo  拒绝访问的用户(用空格隔开)
+    
+ AllowUsers  root osmond vivek  允许访问的用户(用空格隔开)
+    
+ PermitRootLogin  no  禁止root用户登陆
+    
+ PermitEmptyPasswords no  用户登陆需要密码认证
+    
+ PasswordAuthentication  yes  启用口令认证方式
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;重启OpenSSH服务&lt;/p&gt;
+
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; service sshd restart
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;如果不能登录连接，则是没有开放端口，开启防火墙的22端口：&lt;/p&gt;
+
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; sudo firewall-cmd --zone=public --add-port=22/tcp --permanent  
+ sudo service firewalld restart  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;</content><author><name>zhoubin</name></author><category term="linux" /><category term="ssh" /><summary type="html">重新安装系统，都需要配置网卡，同时方便远程连接，也会开启SSH服务。</summary></entry><entry><title type="html">Gogs中自定义首页</title><link href="https://zmngw.github.io/2024/02/23/customgogshomepage/" rel="alternate" type="text/html" title="Gogs中自定义首页" /><published>2024-02-23T00:00:00+08:00</published><updated>2024-02-23T00:00:00+08:00</updated><id>https://zmngw.github.io/2024/02/23/customgogshomepage</id><content type="html" xml:base="https://zmngw.github.io/2024/02/23/customgogshomepage/">&lt;p&gt;如果Gogs服务不是在docker中进行部署，可以通过&lt;a href=&quot;https://gogs.io/docs/features/custom_template&quot;&gt;官网文档&lt;/a&gt;法进行修改。&lt;/p&gt;
+
+&lt;p&gt;当使用docker部署服务时，官网中没有详细说明怎样处理，主要是要找到映射相关文件夹。&lt;/p&gt;
+
+&lt;p&gt;比如，在创建docker容器时，有如下映射：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/data:/data
+
+#结构如下
+/data
+|-- git
+|   |-- gogs-repositories
+|-- ssh
+|   |-- # ssh public/private keys for Gogs
+|-- gogs
+    |-- conf
+    |-- data
+    |-- log
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;其中，/data/gogs就对应自定义目录：custom 文件夹，相对于官网，自定义文件夹结构如下：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;自定义文件夹&lt;/th&gt;
+      &lt;th&gt;docker映射文件夹&lt;/th&gt;
+      &lt;th&gt;备注&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;custom文件夹&lt;/td&gt;
+      &lt;td&gt;/data/gogs&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;custom/templates&lt;/td&gt;
+      &lt;td&gt;/data/gogs/templates&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;custom/public&lt;/td&gt;
+      &lt;td&gt;/data/gogs/public&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;custom/public/img/favicon.png&lt;/td&gt;
+      &lt;td&gt;/data/gogs/public/img/favicon.png&lt;/td&gt;
+      &lt;td&gt;自定义站点图标&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;custom/templates/home.tmpl&lt;/td&gt;
+      &lt;td&gt;/data/gogs/templates/home.tmpl&lt;/td&gt;
+      &lt;td&gt;自定义首页&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;模板文件的变更，需要重启docker服务，静态文件的变更不需要。&lt;/p&gt;
+&lt;/blockquote&gt;</content><author><name>zhoubin</name></author><category term="git" /><category term="docker" /><summary type="html">如果Gogs服务不是在docker中进行部署，可以通过官网文档法进行修改。</summary></entry><entry><title type="html">MySQL 常用数据类型和函数</title><link href="https://zmngw.github.io/2024/02/06/mysqlchoosedatatype/" rel="alternate" type="text/html" title="MySQL 常用数据类型和函数" /><published>2024-02-06T00:00:00+08:00</published><updated>2024-02-06T00:00:00+08:00</updated><id>https://zmngw.github.io/2024/02/06/mysqlchoosedatatype</id><content type="html" xml:base="https://zmngw.github.io/2024/02/06/mysqlchoosedatatype/">&lt;h4 id=&quot;数据类型&quot;&gt;数据类型&lt;/h4&gt;
+
+&lt;h5 id=&quot;整形&quot;&gt;整形&lt;/h5&gt;
+&lt;ul&gt;
+  &lt;li&gt;使用场景
+类型|字节|备注&lt;/li&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;TINYINT&lt;/td&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;一般用于枚举数据，比如系统设定等取值范围很小且固定的场景&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;SMALLINT&lt;/td&gt;
+          &lt;td&gt;2&lt;/td&gt;
+          &lt;td&gt;可以用于较小范围的统计数据，比如统计工厂的固定资产库存数量等&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;MEDIUMINT&lt;/td&gt;
+          &lt;td&gt;3&lt;/td&gt;
+          &lt;td&gt;用于较大整数的计算，比如车站每日的客流量等&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;INT（INTEGER）&lt;/td&gt;
+          &lt;td&gt;4&lt;/td&gt;
+          &lt;td&gt;取值范围足够大，一般情况下不用考虑超限问题，用的最多&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;BIGINT&lt;/td&gt;
+          &lt;td&gt;8&lt;/td&gt;
+          &lt;td&gt;只有当你处理特别巨大的整数时才会用到。比如双十一的交易量、大型门户网站点击量，证券公司衍生产品持仓等&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+  &lt;li&gt;取值范围
+类型|有符号数取值范围|无符号数取值范围|字节&lt;/li&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;TINYINT&lt;/td&gt;
+          &lt;td&gt;-128~127&lt;/td&gt;
+          &lt;td&gt;0~255&lt;/td&gt;
+          &lt;td&gt;1&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;SMALLINT&lt;/td&gt;
+          &lt;td&gt;-32768~32767&lt;/td&gt;
+          &lt;td&gt;0~65535&lt;/td&gt;
+          &lt;td&gt;2&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;MEDIUMINT&lt;/td&gt;
+          &lt;td&gt;-8388608~8388607&lt;/td&gt;
+          &lt;td&gt;0~16777215&lt;/td&gt;
+          &lt;td&gt;3&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;INT（INTEGER）&lt;/td&gt;
+          &lt;td&gt;-2147483648~2147483647&lt;/td&gt;
+          &lt;td&gt;0~4294967295&lt;/td&gt;
+          &lt;td&gt;4&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;BIGINT&lt;/td&gt;
+          &lt;td&gt;-922337203&amp;lt;/br&amp;gt;6854775808~9223372036854775807&lt;/td&gt;
+          &lt;td&gt;0~1844674407_3709551615&lt;/td&gt;
+          &lt;td&gt;8&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id=&quot;浮点数&quot;&gt;浮点数&lt;/h5&gt;
+&lt;p&gt;类型|有符号数取值范围|无符号数取值范围|字节|备注&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;FLOAT&lt;/td&gt;
+          &lt;td&gt;(-3.402823466E+38,-1.175494351E-38),&amp;lt;/br&amp;gt;0,(1.175494351E-38,3.402823466E+38)&lt;/td&gt;
+          &lt;td&gt;0,(1.175494351E-38,&amp;lt;/br&amp;gt;3.402823466E+38)&lt;/td&gt;
+          &lt;td&gt;4&lt;/td&gt;
+          &lt;td&gt;单精度浮点数&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;DOUBLE&lt;/td&gt;
+          &lt;td&gt;(-1.7976931348623157E+308,&amp;lt;/br&amp;gt;-2.2250738585072014E-308),&amp;lt;/br&amp;gt;0,(2.2250738585072014E-308,&amp;lt;/br&amp;gt;1.7976931348623157E+308)&lt;/td&gt;
+          &lt;td&gt;0,(2.2250738585&lt;em&gt;&amp;lt;/br&amp;gt;072014E-308,&amp;lt;/br&amp;gt;1.7976931348&lt;/em&gt;&amp;lt;/br&amp;gt;623157E+308)&lt;/td&gt;
+          &lt;td&gt;8&lt;/td&gt;
+          &lt;td&gt;双精度浮点数&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;REAL 默认就是DOUBLE。如果SQL模式设定为“REAL_AS_FLOAT”,那么MySQL就认为REAL是FLOAT，可以通过以下语句实现：&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;sql_mode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;REAL_AS_FLOAT&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h5 id=&quot;定点数&quot;&gt;定点数&lt;/h5&gt;
+&lt;p&gt;Decimal(M,D),其中M&amp;lt;=65,D&amp;lt;M&lt;/p&gt;
+
+&lt;h5 id=&quot;文本类型&quot;&gt;文本类型&lt;/h5&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;类型&lt;/th&gt;
+      &lt;th&gt;字节&lt;/th&gt;
+      &lt;th&gt;备注&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;CHAR(M)&lt;/td&gt;
+      &lt;td&gt;长度M&lt;/td&gt;
+      &lt;td&gt;固定长字符串，长度不够补空格&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;VARCHAR(M)&lt;/td&gt;
+      &lt;td&gt;M&lt;/td&gt;
+      &lt;td&gt;可变长字符串&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;ENUM&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;枚举类型，取值必须是预先设定的一组字符串值范围之内的一个&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;SET&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;字符串对象，取值必须是以预先设定的一组字符串范围之内0个或多个&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;TINYTEXT&lt;/td&gt;
+      &lt;td&gt;255&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;TEXT&lt;/td&gt;
+      &lt;td&gt;65535&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;MEDIUMTEXT&lt;/td&gt;
+      &lt;td&gt;16777215&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;LONGTEXT&lt;/td&gt;
+      &lt;td&gt;4294967295&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;MySQL不允许TEXT做主键&lt;/p&gt;
+
+&lt;h5 id=&quot;日期类型&quot;&gt;日期类型&lt;/h5&gt;
+&lt;p&gt;类型|日期格式|范围|字节&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;YEAR&lt;/td&gt;
+          &lt;td&gt;YYYY&lt;/td&gt;
+          &lt;td&gt;1901-2155&lt;/td&gt;
+          &lt;td&gt;1&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;TIME&lt;/td&gt;
+          &lt;td&gt;HH:MM:SS&lt;/td&gt;
+          &lt;td&gt;-838:59:59~838:59:59&lt;/td&gt;
+          &lt;td&gt;3&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;DATE&lt;/td&gt;
+          &lt;td&gt;YYYY-MM-DD&lt;/td&gt;
+          &lt;td&gt;1000-01-01~9999-12-3&lt;/td&gt;
+          &lt;td&gt;3&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;DATETIME&lt;/td&gt;
+          &lt;td&gt;YYYY-MM-DD HH:MM:SS&lt;/td&gt;
+          &lt;td&gt;1000-01-01 00:00:00~9999-12-31 23:59:59&lt;/td&gt;
+          &lt;td&gt;8&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;TIMESTAMP&lt;/td&gt;
+          &lt;td&gt;YYYY-MM-DD HH:MM:SS&lt;/td&gt;
+          &lt;td&gt;1970-01-01 00:00:00 UTC~2038-01-19 03:14:07 UTC&lt;/td&gt;
+          &lt;td&gt;4&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;在定义数据类型时，如果确定是整数，就用INT；如果是小数，就用DECIMAL；如果是字符串，只要不是主键，就用TET；如果是日期与时间，就用DATETIME。主键最好不选择业务字段，应该使用自动生成列，如bigint&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;where与having的区别&quot;&gt;where与having的区别&lt;/h4&gt;
+&lt;p&gt;1、前者可以连接表时，是先过虑数据后连接，后者是先连接后过虑；&lt;/p&gt;
+
+&lt;p&gt;2、后者可以使用聚合函数过虑数据&lt;/p&gt;
+
+&lt;h4 id=&quot;函数&quot;&gt;函数&lt;/h4&gt;
+&lt;p&gt;#####　日期函数
+名称|函数|说明&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;获取日期时间中指定的值&lt;/td&gt;
+          &lt;td&gt;EXTRACT(type FROM date)&lt;/td&gt;
+          &lt;td&gt;type包括HOUR,DAY,MONTH,YEAR,MINUTE,SECOND&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;获取日期时间中小时&lt;/td&gt;
+          &lt;td&gt;HOUR()&lt;/td&gt;
+          &lt;td&gt;获取小时&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;获取日期时间中年&lt;/td&gt;
+          &lt;td&gt;YEAR()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;获取日期时间中月&lt;/td&gt;
+          &lt;td&gt;MONTH()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;获取日期时间中天&lt;/td&gt;
+          &lt;td&gt;DAY()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;获取日期时间中分钟&lt;/td&gt;
+          &lt;td&gt;MINUTE()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;获取日期时间中秒&lt;/td&gt;
+          &lt;td&gt;SECOND()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;日期加天&lt;/td&gt;
+          &lt;td&gt;DATE_ADD()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;日期加天&lt;/td&gt;
+          &lt;td&gt;DDDATE()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;日期减天&lt;/td&gt;
+          &lt;td&gt;DATE_SUB&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;日期减天&lt;/td&gt;
+          &lt;td&gt;SUBDATE()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;日期相关天数&lt;/td&gt;
+          &lt;td&gt;DATEDIFF()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;当月最后一天日期&lt;/td&gt;
+          &lt;td&gt;LAST_DAY()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;获取当前日期&lt;/td&gt;
+          &lt;td&gt;CURDATE()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;获取日期星期几&lt;/td&gt;
+          &lt;td&gt;WEEKOFDAY()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;格式化日期时间&lt;/td&gt;
+          &lt;td&gt;DATE_FORMAT()&lt;/td&gt;
+          &lt;td&gt; &lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id=&quot;取整函数&quot;&gt;取整函数&lt;/h5&gt;
+&lt;p&gt;函数|说明&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;CEIL(X)&lt;/td&gt;
+          &lt;td&gt;返回大于等于X的最小INT型整数&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;CEILING(X)&lt;/td&gt;
+          &lt;td&gt;返回大于等于X的最小INT型整数&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;FLOOR(X)&lt;/td&gt;
+          &lt;td&gt;返回小于等于X的最小INT型整数&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;ROUND(X,D)&lt;/td&gt;
+          &lt;td&gt;X表示要处理的数，D表示保留的小数位数，处理方式是四舍五入。如果不输入D，表示保留０位小数&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id=&quot;字符串函数&quot;&gt;字符串函数&lt;/h5&gt;
+&lt;p&gt;函数|说明&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;CONCAT(s1,s2,…)&lt;/td&gt;
+          &lt;td&gt;表示把字符串拼接起来&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;CAST(EXPRESS AS CHAR)&lt;/td&gt;
+          &lt;td&gt;将表达式的值转换成字符串&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;CHAR_LENGTH(s1)&lt;/td&gt;
+          &lt;td&gt;获取字符串长度&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;SPACE(n)&lt;/td&gt;
+          &lt;td&gt;获取一个由N个空格组成的字符串&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;SUBSTR(s,n)或SUBSTR(s FROM n)&lt;/td&gt;
+          &lt;td&gt;获取从字符串“s”的第“n”个位置开始，到“s”结尾的子字符串&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;MID(s,n,len)&lt;/td&gt;
+          &lt;td&gt;获取从字符串“s”的第“n”个位置，获取长度为len的子字符串&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;TRIM(s1 FROM s)&lt;/td&gt;
+          &lt;td&gt;除去字符串“s”的两端所有的字符串“s1”&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;LTRIM(s)&lt;/td&gt;
+          &lt;td&gt;除去字符串左侧的所有空格&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;RTRIM(s)&lt;/td&gt;
+          &lt;td&gt;除去字符串左侧的所有空格&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;IFNULL(V1,V2)&lt;/td&gt;
+          &lt;td&gt;如果V1的值不为空值，则返回V1,否则返回V2&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;IF(EXPRESS,V1,V2)&lt;/td&gt;
+          &lt;td&gt;如果EXPRESS为true，则返回V1,否则返回V2&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id=&quot;not用法&quot;&gt;Not用法&lt;/h5&gt;
+&lt;p&gt;Not可用于in,exists,between中表示取反&lt;/p&gt;
+
+&lt;h5 id=&quot;regexp正则过虑&quot;&gt;regexp正则过虑&lt;/h5&gt;
+&lt;p&gt;语法：column regexp ‘^233$’
+其中转义符使用：\ 
+如果要匹配单个\,应该使用:\\&lt;/p&gt;
+
+&lt;h5 id=&quot;group-by--with-rowup&quot;&gt;group by  with rowup&lt;/h5&gt;
+&lt;p&gt;分组后汇总&lt;/p&gt;
+
+&lt;p&gt;。INSERT操作可能很耗时（特别是有很多索引需要更新时），而且它可能降低等待处理的SELECT语句的性能。
+如果数据检索是最重要的（通常是这样），则你可以通过在INSERT和INTO之间添加关键字LOW_PRIORITY，指示MySQL降低INSERT语句的优先级，如下所示：
+[插图]
+顺便说一下，这也适用于下一章介绍的UPDATE和DELETE语句。&lt;/p&gt;
+
+&lt;p&gt;如果视图定义中有以下操作，则不能进行视图的更新：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;分组（使用GROUP BY和HAVING）；&lt;/li&gt;
+  &lt;li&gt;联结；&lt;/li&gt;
+  &lt;li&gt;子查询；&lt;/li&gt;
+  &lt;li&gt;并；&lt;/li&gt;
+  &lt;li&gt;聚集函数（Min()、Count()、Sum()等）；&lt;/li&gt;
+  &lt;li&gt;DISTINCT；&lt;/li&gt;
+  &lt;li&gt;导出（计算）列。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;函数-1&quot;&gt;函数&lt;/h2&gt;
+
+&lt;h3 id=&quot;roundxroundxy和truncatexy&quot;&gt;ROUND(x)、ROUND(x,y)和TRUNCATE(x,y)&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;ROUND(x)函数返回最接近于参数x的整数，对x值进行四舍五入。&lt;/li&gt;
+  &lt;li&gt;ROUND(x,y)函数返回最接近于参数x的数，其值保留到小数点后面y位，若y为&lt;strong&gt;负值&lt;/strong&gt;，则将保留x值到小数点左边y位。&lt;/li&gt;
+  &lt;li&gt;TRUNCATE(x,y)函数返回被舍去至小数点后y位的数字x。若y的值为0，则结果不带有小数点或不带有小数部分。若y设为负数，则截去（归零）x小数点左起第y位开始后面所有低位的值。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;select&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ROUND&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;round&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;round&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;123&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;round&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;153&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;ROUND&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;n&quot;&gt;round&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;n&quot;&gt;round&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;123&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;n&quot;&gt;round&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;153&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;	            &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;	            &lt;span class=&quot;mi&quot;&gt;120&lt;/span&gt;	                &lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;select&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;truncate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;truncate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;truncate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;123&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;truncate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;523&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;truncate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;k&quot;&gt;truncate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;k&quot;&gt;truncate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;123&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;k&quot;&gt;truncate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;523&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;	                &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;	                &lt;span class=&quot;mi&quot;&gt;120&lt;/span&gt;	                    &lt;span class=&quot;mi&quot;&gt;500&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;timestamp&quot;&gt;timestamp&lt;/h3&gt;
+&lt;p&gt;在mysql中timestamp数据类型是一个比较特殊的数据类型，他可以自动在你不使用程序更新情况下，插入或者修改记录会自动更新timestamp的值。&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;初始值&lt;/th&gt;
+      &lt;th&gt;说明&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;无&lt;/td&gt;
+      &lt;td&gt;插入和更新时，自动更新&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;ON UPDATE CURRENT_TIMESTAMP&lt;/td&gt;
+      &lt;td&gt;仅更新时，自动更新&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;default CURRENT_TIMESTAMP&lt;/td&gt;
+      &lt;td&gt;仅插入时，自动更新&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;default current_timestamp &amp;lt;/br&amp;gt; on update CURRENT_TIMESTAMP&lt;/td&gt;
+      &lt;td&gt;插入和更新时，自动更新&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;ON UPDATE CURRENT_TIMESTAMP 只有对记录进行修改时才更新为当前时间，插入是不会的&lt;/li&gt;
+  &lt;li&gt;default CURRENT_TIMESTAMP  在插入记录时，会添加当前时间，但在修改记录时，不会再更新当前时间&lt;/li&gt;
+  &lt;li&gt;default current_timestamp on update CURRENT_TIMESTAMP 在插入或者更新记录时，都会更新当前时间&lt;/li&gt;
+  &lt;li&gt;如果default或on update 子句都不写，就等同于 default current_timestamp on update CURRENT_TIMESTAMP&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>zhoubin</name></author><category term="mysql" /><category term="sql" /><summary type="html">数据类型</summary></entry><entry><title type="html">指标与标签</title><link href="https://zmngw.github.io/2023/12/14/IndicatorsAndLabels/" rel="alternate" type="text/html" title="指标与标签" /><published>2023-12-14T00:00:00+08:00</published><updated>2023-12-14T00:00:00+08:00</updated><id>https://zmngw.github.io/2023/12/14/IndicatorsAndLabels</id><content type="html" xml:base="https://zmngw.github.io/2023/12/14/IndicatorsAndLabels/">&lt;p&gt;指标和标签是两个很容易混淆的词汇。本文简要说明指标、标签的区别，指标和标签体系建立的建立方法，如何用好标签与指标。&lt;/p&gt;
+
+&lt;h3 id=&quot;指标与标签的区别&quot;&gt;指标与标签的区别&lt;/h3&gt;
+
+&lt;p&gt;指标通常是描述客观事实，并通过不同的统计口径，叠加不同的计算维度与限定词来展现客观事实。指标多为数值型，最常见的数据指标为各类宏观指标。比如 GDP、CPI，都是一个实实在在的数字，无人为判断。。具有数据口径的指标通常是抽象的概念，比如将数据计数、求和、比率等，与具体的实体无关。&lt;/p&gt;
+
+&lt;p&gt;标签通常是人为定义的概念，比如客群标签可以分为长尾客户、高净值客户；产品标签有高风险和低风险。标签并不是一个客观的事实，而是由人为的定义和客观事实结合得到的数据标签。&lt;/p&gt;
+
+&lt;p&gt;标签通常会定位到具体的实体，其核心的目的是划分不同的实体群组。比如长尾客户，一定可以通过一些数据指标圈定出一部分人群，通过数据标签可以进行更加精细化的用户运营。&lt;/p&gt;
+
+&lt;p&gt;从二者之间的关系来说是可以相互转化的。指标可以从标签中转化，比如高净值客户的迁移率（从长尾客户转化到高净值客户的比率），其中高净值客户和长尾客户都是标签，但在标签的基础上增加一个迁徙率，就由标签转化为了指标。&lt;/p&gt;
+
+&lt;p&gt;同样标签也可以从指标转化得来，比如说银行中常用的数据标签：私行客户（AUM&amp;gt;=500万），其中 AUM 就是数据指标，不同银行的标签设定可能是不同的。以上就是数据指标和标签在内容上的区别。&lt;/p&gt;
+
+&lt;h4 id=&quot;指标分类&quot;&gt;指标分类&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;原子指标是不需要叠加任何纬度的，通常是 SQL 直接统计的一些基础指标，比如客户数、交易量等。&lt;/li&gt;
+  &lt;li&gt;派生指标是由原子指标通过叠加一个或多个维度而得到的二级指标&lt;/li&gt;
+  &lt;li&gt;衍生指标&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;标签分类&quot;&gt;标签分类&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;事实标签来自于底层的原始数据，事实标签用于描述实体的客观事实&lt;/li&gt;
+  &lt;li&gt;规则标签是基于事实的统计结果，结合一些人为判断而生成&lt;/li&gt;
+  &lt;li&gt;模型标签则更加抽象、更加主观，是通过事实标签和规则标签抽象而来的群体特征&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;指标体系建立&quot;&gt;指标体系建立&lt;/h3&gt;
+&lt;p&gt;指标体系的建设需要自上而下与自下而上相结合，建立指标体系要基于公司整体发展战略为基础进行拆解。&lt;/p&gt;
+
+&lt;p&gt;基于公司发展战略，梳理战略相关的关键价值驱动因素，理解营销活动的关键目标&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;自上而下演绎：以价值树方式逐层拆解指标&lt;/li&gt;
+  &lt;li&gt;指标体系-建体系：首先做业务访谈从而将指标归类，梳理过程中要做到不重不漏&lt;/li&gt;
+  &lt;li&gt;指标体系-做评估和补数据：构建数据全景图，有充推动指标完整性建议&lt;/li&gt;
+  &lt;li&gt;完成指标库业务、技术、管理维度属性定义&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;标签体系建立&quot;&gt;标签体系建立&lt;/h3&gt;
+&lt;p&gt;标签体系的核心是以整个业务经营为目标，因为标签需要在实际一线营销中应用，所以最好从业务的实际目标出发去梳理标签的需求。同指标体系相同，有固定的形式和属性，并且需要定义完整的标签管理机制。同指标类似，例如名称、含义和口径等等都需要标准化的定义。
+和指标的梳理过程一样，需要清晰的知道标签属于业务价值体系中的哪一类，在此基础上才能够知道标签是在哪个环节缺失并完成针对性的补充。&lt;/p&gt;
+
+&lt;h3 id=&quot;用好标签与指标&quot;&gt;用好标签与指标&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;如何用好标签&lt;/p&gt;
+
+    &lt;p&gt;在使用标签的过程中会遇到一些常见的问题。比如标签实际匹配出的客户数目与预期不同，在业务理解下的标签圈定的实体数量是可估量的，若实际数据与估计值相差过多时，需要核实标签的计算口径。比如标签是否重复加工，需要统计标签的使用量，便于业务收集哪些标签是热门，哪些标签是好用的，哪些标签是可以被废弃的。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;如何用好指标&lt;/p&gt;
+
+    &lt;p&gt;指标通常是拆解使用的，核心点在于如何将大的指标拆解为子指标，比如消费放款增速这个指标发生异动，可以将其分解成为外部因素和内部因素，并继续拆分，拆分到原子指标就可以大概得知是放款审核的原因还是外部的一些经济政策原因等等。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</content><author><name>zhoubin</name></author><category term="数仓" /><category term="指南" /><category term="指标" /><category term="标签" /><summary type="html">指标和标签是两个很容易混淆的词汇。本文简要说明指标、标签的区别，指标和标签体系建立的建立方法，如何用好标签与指标。</summary></entry><entry><title type="html">.Net8新特性</title><link href="https://zmngw.github.io/2023/11/25/net8feature/" rel="alternate" type="text/html" title=".Net8新特性" /><published>2023-11-25T00:00:00+08:00</published><updated>2023-11-25T00:00:00+08:00</updated><id>https://zmngw.github.io/2023/11/25/net8feature</id><content type="html" xml:base="https://zmngw.github.io/2023/11/25/net8feature/">&lt;p&gt;本文整理.Net8新特性的使用方法。
+当前包括：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Route ShortCircuit&lt;/li&gt;
+  &lt;li&gt;Exception Throw Helper&lt;/li&gt;
+  &lt;li&gt;HttpLoggingMiddleware 的改进&lt;/li&gt;
+  &lt;li&gt;C# 12 中的 InlineArray 特性&lt;/li&gt;
+  &lt;li&gt;随机数增强&lt;/li&gt;
+  &lt;li&gt;KeyedServices&lt;/li&gt;
+  &lt;li&gt;IPNetwork&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;route-shortcircuit&quot;&gt;Route ShortCircuit&lt;/h2&gt;
+
+&lt;p&gt;有些请求，如浏览器会自动请求 favicon.ico，这些请求即使很简单，往往也会完整地运行中间件管道，但实际上可能并不需要，在 .NET 8 中引入了一个 Route ShortCircuit 的功能，也就是路由短路，可以在处理结束之后马上中断请求，不再执行后面的中间件了，这样会使得这样的路由或者 API 更加高效。&lt;/p&gt;
+
+&lt;p&gt;在 route 后添加 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ShortCircut()&lt;/code&gt; 来启用，使用方法如下：&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WebApplication&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CreateSlimBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Build&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Use&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpContext&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RequestDelegate&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Headers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Value&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;123&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;MapGet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Hello .NET 8!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// ShortCircuit&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;MapGet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/short-circuit&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Short circuiting!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ShortCircuit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;MapGet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/short-circuit-status&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Short circuiting!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ShortCircuit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;401&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// MapShortCircuit&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;MapShortCircuit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;404&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;robots.txt&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;favicon.ico&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;MapShortCircuit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;403&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;admin&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;RunAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;exception-throw-helper&quot;&gt;Exception Throw Helper&lt;/h2&gt;
+
+&lt;p&gt;在 .NET 6 中，引入了一个 ArgumentNullException.ThrowIfNull(object? argument, string? paramName = default) 的方法，在 .NET 7/8 中引入了更多的支持，我们可以在代码里使用这些 exception helper 来简化一些代码。&lt;/p&gt;
+
+&lt;p&gt;常用的 Argument exception：&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nf&quot;&gt;ArgumentNullExceptionSample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;nf&quot;&gt;ArgumentExceptionThrowIfNullOrEmptySample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;ArgumentExceptionThrowIfNullOrEmptySample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Empty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;nf&quot;&gt;ArgumentExceptionThrowIfNullOrWhiteSpaceSample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;ArgumentExceptionThrowIfNullOrWhiteSpaceSample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Empty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;ArgumentExceptionThrowIfNullOrWhiteSpaceSample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot; &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ArgumentNullExceptionSample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;InvokeHelper&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;TryInvoke&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgumentNullException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ThrowIfNull&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ArgumentExceptionThrowIfNullOrEmptySample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;InvokeHelper&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;TryInvoke&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgumentException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ThrowIfNullOrEmpty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ArgumentExceptionThrowIfNullOrWhiteSpaceSample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;InvokeHelper&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;TryInvoke&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgumentException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ThrowIfNullOrWhiteSpace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ArgumentNullException.ThrowIfNull(object? obj, string? paramName = default)&lt;/code&gt;  是 .NET 6 开始支持的&lt;/p&gt;
+
+&lt;p&gt;在 .NET 7 里支持了指针的判断 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ArgumentNullException.ThrowIfNull(void* argument, string? paramName = default)&lt;/code&gt;(not CLS-compliant)&lt;/p&gt;
+
+&lt;p&gt;.NET 7 还引入了 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ArgumentException.ThrowIfNullOrEmpty(string? value, string? paramName = default)&lt;/code&gt;, 增加判断空字符串的场景&lt;/p&gt;
+
+&lt;p&gt;.NET 8 引入了 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ArgumentException.ThrowIfNullOrWhiteSpace(string? value, string? paramName = default)&lt;/code&gt; 增强了判断空字符串的场景&lt;/p&gt;
+
+&lt;h2 id=&quot;httploggingmiddleware-的改进&quot;&gt;HttpLoggingMiddleware 的改进&lt;/h2&gt;
+
+&lt;p&gt;.NET 6 开始引入了一个 http logging 的中间件，我们可以借助于 http logging 的中间件记录请求和响应的信息，但是扩展性不是很强，在 .NET 8 版本中进行了一些优化，引入了一些新的配置和 HttpLoggingInterceptor 使得它更加容易扩展了&lt;/p&gt;
+
+&lt;p&gt;HttpLoggingFields 中新增了一个 Duration 枚举值，会记录请求处理的耗时&lt;/p&gt;
+
+&lt;p&gt;在 HttpLoggingOptions 中增加了一个 CombineLogs 的配置，默认是 false，默认 request/response/duration 的 log 都是分开的,配置为 true 之后就会合并成一条日志。&lt;/p&gt;
+
+&lt;p&gt;##　HttpLoggingInterceptor&lt;/p&gt;
+
+&lt;p&gt;.NET 8 还引入了 IHttpLoggingInterceptor，借助于此可以更好的扩展 http logging&lt;/p&gt;
+
+&lt;p&gt;可以根据 Request 或者 Response 信息来动态地调整要记录的 field 或者动态调整 RequestBodyLogLimit/ResponseBodyLogLimit&lt;/p&gt;
+
+&lt;p&gt;来看一个 HttpLoggingInterceptor 示例：&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sealed&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MyHttpLoggingInterceptor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IHttpLoggingInterceptor&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ValueTask&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;OnRequestAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpLoggingInterceptorContext&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;logContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;logContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;?.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;StartsWith&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/req-&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;logContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LoggingFields&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HttpLoggingFields&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ResponsePropertiesAndHeaders&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;logContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AddParameter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;req-path&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;logContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ValueTask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CompletedTask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ValueTask&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;OnResponseAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpLoggingInterceptorContext&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;logContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;logContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpContext&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StatusCode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;gt;=&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;200&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;300&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/hello&quot;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;logContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;TryDisable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpLoggingFields&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;All&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ValueTask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CompletedTask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;使用示例如下，使用 AddHttpLoggingInterceptor&lt;TInterceptor&gt;() 来注册：&lt;/TInterceptor&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WebApplication&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CreateSlimBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Services&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AddHttpLogging&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;options&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LoggingFields&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HttpLoggingFields&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;All&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CombineLogs&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Services&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AddHttpLoggingInterceptor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MyHttpLoggingInterceptor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;();&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Build&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;UseHttpLogging&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;MapGet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;MapGet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/crash&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Results&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;BadRequest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;MapGet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/req-intercept&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Hello .NET 8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;appliction.json文件中加入&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&quot;Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware&quot;: &quot;Information&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;运行应用&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS C:\MyData\Source\Net8Test\WebApplication1\bin\Debug\net8.0&amp;gt; dotnet-http :5055/hello
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+Date: Sat, 25 Nov 2023 08:53:59 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+//日志
+
+info: Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware[9]
+      Request and Response:
+      Protocol: HTTP/1.1
+      Method: GET
+      Scheme: http
+      PathBase:
+      Path: /hello
+      Host: localhost:5055
+      User-Agent: dotnet-httpie/0.7.2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS C:\MyData\Source\Net8Test\WebApplication1\bin\Debug\net8.0&amp;gt; dotnet-http :5055/crash
+HTTP/1.1 400 BadRequest
+Content-Length: 0
+Date: Sat, 25 Nov 2023 08:53:40 GMT
+Server: Kestrel
+
+info: Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware[9]
+      Request and Response:
+      Protocol: HTTP/1.1
+      Method: GET
+      Scheme: http
+      PathBase:
+      Path: /crash
+      Host: localhost:5055
+      User-Agent: dotnet-httpie/0.7.2
+      StatusCode: 400
+      Duration: 9.8983
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS C:\MyData\Source\Net8Test\WebApplication1\bin\Debug\net8.0&amp;gt; dotnet-http :5055/req-intercept
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+Date: Sat, 25 Nov 2023 08:53:14 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+info: Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware[9]
+      Request and Response:
+      req-path: /req-intercept
+      StatusCode: 200
+      Content-Type: text/plain; charset=utf-8
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;可以看到每个请求的 log 输出的结果都有所不同，第一个请求虽然我们设置了 ogContext.TryDisable(HttpLoggingFields.All) 但是还是有输出结果这是因为 httpLogging 目前的实现就是这样，在 Response 里处理的时候 request 信息已经被记录好了，详细可以参考 http logging middleware 的 &lt;a href=&quot;https://github.com/dotnet/aspnetcore/blob/main/src/Middleware/HttpLogging/src/HttpLoggingMiddleware.cs&quot;&gt;实现&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;如果想要完全 disable 需要在 OnRequestAsync 方法里处理&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ValueTask&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;OnRequestAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpLoggingInterceptorContext&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;logContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/no-log&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Equals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;logContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StringComparison&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;OrdinalIgnoreCase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;logContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LoggingFields&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HttpLoggingFields&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ValueTask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CompletedTask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这样请求就不会有日志打印了&lt;/p&gt;
+
+&lt;p&gt;最后一个 req-intercept 在  request 的处理中设置了 ResponsePropertiesAndHeaders 并且加了一个自定义的 Parameter 从输出结果可以看到有输出到日志&lt;/p&gt;
+
+&lt;p&gt;More
+大家可以自己尝试一下，比之前会好用一些，但是觉得还是有所欠缺&lt;/p&gt;
+
+&lt;p&gt;比如日志级别目前还都是 Information 不能动态的改变日志级别&lt;/p&gt;
+
+&lt;p&gt;另外就是前面提到的即使使用 CombineLogs 在 response 中设置为 HttpLoggingFields.None 时，依然会记录 request 信息，希望后面还会继续优化一下&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;dotnet-http 可以通过如下命令安装：dotnet install dotnet-httpie&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;c-12-中的-inlinearray-特性&quot;&gt;C# 12 中的 InlineArray 特性&lt;/h2&gt;
+
+&lt;p&gt;C# 12 引入了一个 InlineArray 特性，利用这一特性，我们可以更方便地类数组的结构体，可以代替原来要使用非安全代码的 fixed size buffer&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Runtime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CompilerServices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;InlineArray&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MyArray&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// required&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_element&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;使用 InlineArray 需要指定 size，也就是 array 的长度，并且我们需要声明一个字段&lt;/p&gt;
+
+&lt;p&gt;使用示例如下：&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;MyArray&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;++)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;,&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;ReadOnlySpan&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;span&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;span&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;,&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[^&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.])&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;,&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[^&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// error CS0021: Cannot apply indexing with [] to an expression of type &apos;MyArray&apos;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// if (arr is [0,1,..])&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//     Console.WriteLine(&quot;StartsWith 0, 1&quot;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;span&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,..])&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;StartsWith 0, 1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// error CS9174: Cannot initialize type &apos;MyArray&apos; with a collection expression because the type is not constructible.&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// arr = [1, 2, 3, 4, 5];&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;span&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;span&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;,&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;运行结果：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;0,1,2,3,4,5,6,7,8,9,
+0,1,2,3,4,5,6,7,8,9,
+8,9,
+9
+StartsWith 0, 1
+1,2,3,4,5,
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;从这个示例可以看得出来，我们可以像使用数组一样使用，同时我们可以直接隐式转换成 Span 和 ReadOnlySpan,
+并且可以使用 Index 和 Range 操作符,但是目前暂时不能直接使用集合表达式和 list pattern，但是我们可以转成 span 之后再使用&lt;/p&gt;
+
+&lt;h2 id=&quot;随机数增强&quot;&gt;随机数增强&lt;/h2&gt;
+
+&lt;p&gt;1、在 8 中对随机数类 Random 提供了 GetItems()方法，可以根据指定的数量在提供的一个集合中随机抽取数据项生成一个新的集合：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ReadOnlySpan&amp;lt;string&amp;gt; colors = new[]{&quot;Red&quot;,&quot;Green&quot;,&quot;Blue&quot;,&quot;Black&quot;};
+
+string[] t1 = Random.Shared.GetItems(colors, 10);
+Console.WriteLine(JsonSerializer.Serialize(t1));
+
+//输出：[&quot;Black&quot;,&quot;Green&quot;,&quot;Blue&quot;,&quot;Blue&quot;,&quot;Green&quot;,&quot;Blue&quot;,&quot;Green&quot;,&quot;Black&quot;,&quot;Green&quot;,&quot;Blue&quot;]
+//每次都会不一样
+Console.ReadKey();
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;2、通过 Random 提供的 Shuffle() 方法，可以将一个集合中的数据项的顺序打乱：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;string[] colors = new[]{&quot;Red&quot;,&quot;Green&quot;,&quot;Blue&quot;,&quot;Black&quot;};
+Random.Shared.Shuffle(colors);
+
+Console.WriteLine(JsonSerializer.Serialize(colors));
+
+Console.ReadKey();
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;keyedservices&quot;&gt;KeyedServices&lt;/h2&gt;
+
+&lt;p&gt;要实现一个接口多个实现类的注入，还需要写一些额外的代码，比较繁琐。&lt;/p&gt;
+
+&lt;p&gt;版本 8 中添加了注入关键字，可以很方便实现，看下面代码：&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WebApplication&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CreateBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Services&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AddKeyedSingleton&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IUser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;UserA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Services&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AddKeyedSingleton&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IUser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;UserB&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;B&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Build&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;MapGet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/user1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;FromKeyedServices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IUser&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;$&quot;hello , &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;?.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;MapGet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/user2&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;FromKeyedServices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;B&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IUser&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;$&quot;hello , &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;?.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;internal&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;IUser&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;GetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;internal&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;UserA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IUser&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;GetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;oec2023&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;internal&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;UserB&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IUser&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;GetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;oec2024&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;ipnetwork&quot;&gt;IPNetwork&lt;/h2&gt;
+
+&lt;p&gt;.NET 8 新增了 IPNetwork 的实现，支持 &lt;a href=&quot;/wiki/2023-11-25%20CIDR/&quot;&gt;CIDR&lt;/a&gt; 网络格式。&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var ipNetwork = &quot;198.51.0.0/16&quot;;
+var network = IPNetwork.Parse(ipNetwork);
+var ip = IPAddress.Parse(&quot;198.51.250.42&quot;);
+Console.WriteLine(network.Contains(ip));
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;运行结果：&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;true
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>zhoubin</name></author><category term="Net" /><category term="新特性" /><summary type="html">本文整理.Net8新特性的使用方法。 当前包括： Route ShortCircuit Exception Throw Helper HttpLoggingMiddleware 的改进 C# 12 中的 InlineArray 特性 随机数增强 KeyedServices IPNetwork</summary></entry><entry><title type="html">Windows本地运行 ITTools</title><link href="https://zmngw.github.io/2023/11/24/ITToolsLocalRun/" rel="alternate" type="text/html" title="Windows本地运行 ITTools" /><published>2023-11-24T00:00:00+08:00</published><updated>2023-11-24T00:00:00+08:00</updated><id>https://zmngw.github.io/2023/11/24/ITToolsLocalRun</id><content type="html" xml:base="https://zmngw.github.io/2023/11/24/ITToolsLocalRun/">&lt;p&gt;&lt;a href=&quot;https://github.com/CorentinTh/it-tools&quot;&gt;ITTools&lt;/a&gt; 是一个综合开发工具，提供了docker的运行模式，在windows下没有相关的自运行方式。采用.net core做扩展的应用程序，在本地自运行此工具。&lt;/p&gt;
+
+&lt;h2 id=&quot;下载ittools源码&quot;&gt;下载ITTools源码&lt;/h2&gt;
+
+&lt;p&gt;从 github &lt;a href=&quot;https://github.com/CorentinTh/it-tools.git&quot;&gt;复制&lt;/a&gt; 官方源码，本地安装好node和npm,&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;npm install
+npm run build
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;准备运行环境&quot;&gt;准备运行环境&lt;/h2&gt;
+&lt;p&gt;ITTools使用vue和typescript开发，需要node和npm环境&lt;/p&gt;
+
+&lt;div class=&quot;language-powershell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;C:\MyData\Source\it-tools-master&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;--version&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v18.16.1&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;PS&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;C:\MyData\Source\it-tools-master&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;npm&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;--version&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;9.5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;打包ittools&quot;&gt;打包ITTools&lt;/h2&gt;
+
+&lt;p&gt;解压源码目录，shell中进入此目录后按序执行&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# 安装依赖包
+npm install
+
+# 文件打包
+npm rum build
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;打包好的文件在：dist目录&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS C:\MyData\Source\it-tools-master\dist&amp;gt; dir
+
+    目录: C:\MyData\Source\it-tools-master\dist
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        2023/11/25     11:27                css
+d-----        2023/11/25     11:27                fonts
+d-----        2023/11/25     11:27                img
+d-----        2023/11/25     11:27                js
+-a----        2023/11/25     11:27            266 browserconfig.xml
+-a----        2023/11/25     11:27          15086 favicon.ico
+-a----        2023/11/25     11:27            101 humans.txt
+-a----        2023/11/25     11:27           4661 index.html
+-a----        2023/11/25     11:27            317 manifest.json
+-a----        2023/11/25     11:27           9010 precache-manifest.5928982fbda43f57074e8bc65f8a8d7c.js
+-a----        2023/11/25     11:27             28 robots.txt
+-a----        2023/11/25     11:27            985 service-worker.js
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;编译错误：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Building for production…Error: error:0308010C:digital envelope routines::unsupported&lt;/p&gt;
+
+    &lt;p&gt;修改package.json，在相关构建命令之前加入SET NODE_OPTIONS=–openssl-legacy-provider&lt;/p&gt;
+
+    &lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;scripts&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+     &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;serve&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;SET NODE_OPTIONS=--openssl-legacy-provider &amp;amp;&amp;amp; vue-cli-service serve&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+     &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;build&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;SET NODE_OPTIONS=--openssl-legacy-provider &amp;amp;&amp;amp; vue-cli-service build&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;调整方法引用来自引用，&lt;a href=&quot;https://blog.csdn.net/fengyuyeguirenenen/article/details/128319228&quot;&gt;查看&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;net-core站点包装程序&quot;&gt;.Net Core站点包装程序&lt;/h2&gt;
+
+&lt;p&gt;建立.net core web应用程序，在项目中新建目录“wwwroot”,再把dist目录中的文件拷贝到此目录。&lt;/p&gt;
+
+&lt;p&gt;打开program.cs文件，编辑内容如下：&lt;/p&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Program&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WebApplication&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CreateBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        
+        &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Build&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;UseDefaultFiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;UseStaticFiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;编译运行程序,输出&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        2023/11/25     10:44                wwwroot
+-a----        2023/11/24     22:24            127 appsettings.Development.json
+-a----        2023/11/24     22:24            151 appsettings.json
+-a----        2023/11/24     22:38            425 ITToolsWarp.deps.json
+-a----        2023/11/24     22:40           5120 ITToolsWarp.dll
+-a----        2023/11/24     22:40         140800 ITToolsWarp.exe
+-a----        2023/11/24     22:40          20320 ITToolsWarp.pdb
+-a----        2023/11/24     22:38            416 ITToolsWarp.runtimeconfig.json
+-a----        2023/11/24     22:38          35458 ITToolsWarp.staticwebassets.runtime.json
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a href=&quot;/assets/file/ittools.zip&quot;&gt;下载工具&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;运行&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ITToolsWarp.exe
+
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5000
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+      
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;站点目录变更方法&quot;&gt;站点目录变更方法&lt;/h3&gt;
+
+&lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;FirstCoreWebApplication&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Program&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;WebApplicationBuilder&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WebApplication&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CreateBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WebApplicationOptions&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;WebRootPath&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;wwwroot&quot;&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+            &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Build&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+            
+            &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;UseStaticFiles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+            
+            &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>zhoubin</name></author><category term="ITTools" /><category term=".Net" /><summary type="html">ITTools 是一个综合开发工具，提供了docker的运行模式，在windows下没有相关的自运行方式。采用.net core做扩展的应用程序，在本地自运行此工具。</summary></entry><entry><title type="html">数据仓库建设规范指南</title><link href="https://zmngw.github.io/2023/11/05/%E6%95%B0%E4%BB%93%E5%BB%BA%E8%AE%BE%E8%A7%84%E8%8C%83%E6%8C%87%E5%8D%97/" rel="alternate" type="text/html" title="数据仓库建设规范指南" /><published>2023-11-05T00:00:00+08:00</published><updated>2023-11-05T00:00:00+08:00</updated><id>https://zmngw.github.io/2023/11/05/%E6%95%B0%E4%BB%93%E5%BB%BA%E8%AE%BE%E8%A7%84%E8%8C%83%E6%8C%87%E5%8D%97</id><content type="html" xml:base="https://zmngw.github.io/2023/11/05/%E6%95%B0%E4%BB%93%E5%BB%BA%E8%AE%BE%E8%A7%84%E8%8C%83%E6%8C%87%E5%8D%97/">&lt;h2 id=&quot;一数据模型架构原则&quot;&gt;一、数据模型架构原则&lt;/h2&gt;
+
+&lt;p&gt;优秀可靠的数仓体系，往往需要清晰的数据分层结构，即要保证数据层的稳定又要屏蔽对下游的影响，并且要避免链路过长。那么问题来了，一直在讲数仓要分层，那数仓分几层最好？&lt;/p&gt;
+
+&lt;p&gt;分层是以解决当前业务快速的数据支撑为目的，为未来抽象出共性的框架并能够赋能给其他业务线，同时为业务发展提供稳定、准确的数据支撑，并能够按照已有的模型为新业务发展提供方向，也就是数据驱动和赋能。&lt;/p&gt;
+
+&lt;p&gt;好的分层架构，有以下好处：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;清晰数据结构；&lt;/li&gt;
+  &lt;li&gt;数据血缘追踪；&lt;/li&gt;
+  &lt;li&gt;减少重复开发；&lt;/li&gt;
+  &lt;li&gt;数据关系条理化；&lt;/li&gt;
+  &lt;li&gt;屏蔽原始数据的影响。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;二数据分层架构&quot;&gt;二、数据分层架构&lt;/h2&gt;
+
+&lt;p&gt;数仓建模在哪层建设呢？我们以维度建模为例，建模是在数据源层的下一层进行建设，就是在DW层进行数仓建模，所以DW层是数仓建设的核心层。&lt;/p&gt;
+
+&lt;p&gt;下面详细阐述下每层建设规范：&lt;/p&gt;
+
+&lt;h3 id=&quot;21-数据源层odsoperational-data-store&quot;&gt;2.1 数据源层：ODS（Operational Data Store）&lt;/h3&gt;
+
+&lt;p&gt;ODS 层，是最接近数据源中数据的一层，为了考虑后续可能需要追溯数据问题，因此对于这一层就不建议做过多的数据清洗工作，原封不动地接入原始数据即可，至于数据的去噪、去重、异常值处理等过程可以放在后面的 DWD 层来做。&lt;/p&gt;
+
+&lt;h3 id=&quot;22-数据仓库层dwdata-warehouse&quot;&gt;2.2 数据仓库层：DW（Data Warehouse）&lt;/h3&gt;
+
+&lt;p&gt;数据仓库层是我们在做数据仓库时要核心设计的一层，在这里，从 ODS 层中获得的数据按照主题建立各种数据模型。&lt;/p&gt;
+
+&lt;p&gt;DW 层又细分为 &lt;strong&gt;DWD&lt;/strong&gt;（Data Warehouse Detail）层、&lt;strong&gt;DWM&lt;/strong&gt;（Data WareHouse Middle）层和 &lt;strong&gt;DWS&lt;/strong&gt;（Data WareHouse Servce） 层。&lt;/p&gt;
+
+&lt;h4 id=&quot;221-数据明细层dwddata-warehouse-detail&quot;&gt;2.2.1 数据明细层：DWD（Data Warehouse Detail）&lt;/h4&gt;
+
+&lt;p&gt;该层一般保持和 ODS 层一样的数据粒度，并且提供一定的数据质量保证。DWD 层要做的就是将数据清理、整合、规范化、脏数据、垃圾数据、规范不一致的、状态定义不一致的、命名不规范的数据都会被处理。&lt;/p&gt;
+
+&lt;p&gt;同时，为了提高数据明细层的易用性，该层会采用一些&lt;strong&gt;维度退化手法，将维度退化至事实表中，减少事实表和维表的关联&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;另外，在该层也会做一部分的数据聚合，将相同主题的数据汇集到一张表中，提高数据的可用性 。&lt;/p&gt;
+
+&lt;h4 id=&quot;222-数据中间层dwmdata-warehouse-middle&quot;&gt;2.2.2 数据中间层：DWM（Data WareHouse Middle）&lt;/h4&gt;
+
+&lt;p&gt;该层会在 DWD 层的数据基础上，数据做轻度的聚合操作，生成一系列的中间表，提升公共指标的复用性，减少重复加工。直观来讲，就是对通用的核心维度进行聚合操作，算出相应的统计指标。&lt;/p&gt;
+
+&lt;p&gt;在实际计算中，如果直接从 DWD 或者 ODS 计算出宽表的统计指标，会存在计算量太大并且维度太少的问题，因此一般的做法是，在 DWM 层先计算出多个小的中间表，然后再拼接成一张 DWS 的宽表。由于宽和窄的界限不易界定，也可以去掉 DWM 这一层，只留 DWS 层，将所有的数据再放在 DWS 亦可。&lt;/p&gt;
+
+&lt;h4 id=&quot;223-数据服务层dwsdata-warehouse-servce&quot;&gt;2.2.3 数据服务层：DWS（Data WareHouse Servce）&lt;/h4&gt;
+
+&lt;p&gt;DWS 层为公共汇总层，会进行轻度汇总，粒度比明细数据稍粗，基于 DWD 层上的基础数据，整合汇总成分析某一个主题域的服务数据，一般是宽表。DWS 层应覆盖 80% 的应用场景。又称数据集市或宽表。&lt;/p&gt;
+
+&lt;p&gt;按照业务划分，如主题域流量、订单、用户等，生成字段比较多的宽表，用于提供后续的业务查询，OLAP 分析，数据分发等。&lt;/p&gt;
+
+&lt;p&gt;一般来讲，该层的数据表会相对比较少，一张表会涵盖比较多的业务内容，由于其字段较多，因此一般也会称该层的表为宽表。&lt;/p&gt;
+
+&lt;h3 id=&quot;3--数据应用层appapplication&quot;&gt;3.  数据应用层：APP（Application）&lt;/h3&gt;
+
+&lt;p&gt;在这里，主要是提供给数据产品和数据分析使用的数据，一般会存放在 ES、 PostgreSql、Redis 等系统中供线上系统使用，也可能会存在 Hive 或者 Druid 中供数据分析和数据挖掘使用。比如我们经常说的报表数据，一般就放在这里。&lt;/p&gt;
+
+&lt;h3 id=&quot;4-维表层dimension&quot;&gt;4. 维表层（Dimension）&lt;/h3&gt;
+
+&lt;p&gt;如果维表过多，也可针对维表设计单独一层，维表层主要包含两部分数据：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;高基数维度数据：一般是用户资料表、商品资料表类似的资料表。&lt;strong&gt;数据量可能是千万级或者上亿级别&lt;/strong&gt;。&lt;/li&gt;
+  &lt;li&gt;低基数维度数据：一般是配置表，比如枚举值对应的中文含义，或者日期维表。数据量可能是个位数或者几千几万。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;5-主题域划分原则&quot;&gt;5. 主题域划分原则&lt;/h3&gt;
+
+&lt;h4 id=&quot;51-按照业务或业务过程划分&quot;&gt;5.1 按照业务或业务过程划分&lt;/h4&gt;
+
+&lt;p&gt;业务容易理解，就是指的功能模块/业务线。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;业务过程&lt;/strong&gt;：指企业的业务活动事件，如下单、支付、退款都是业务过程。需要注意的是，&lt;strong&gt;一个业务过程是一个不可拆分的行为事件，通俗的讲，业务过程就是企业活动中的事件&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h4 id=&quot;52-按照数据域划分&quot;&gt;5.2 按照数据域划分&lt;/h4&gt;
+
+&lt;p&gt;数据域是指面向业务分析，将业务过程或者维度进行抽象的集合。&lt;/p&gt;
+
+&lt;p&gt;其中，业务过程可以概括为一个个不可拆分的行为事件，在业务过程下，可以定义指标，维度是指度量的环境，如买家下单事件，买家是维度。为保障整个体系的生命力，数据域是需要抽象提炼，并且长期维护和更新的，但不轻易变动。&lt;/p&gt;
+
+&lt;p&gt;在划分数据域时，既能涵盖当前所有的业务需求，又能在新业务进入时无影响地被包含进已有的数据域中和扩展新的数据域。&lt;/p&gt;
+
+&lt;h3 id=&quot;6-数据模型设计原则&quot;&gt;6 数据模型设计原则&lt;/h3&gt;
+
+&lt;p&gt;1) 高内聚、低耦合&lt;/p&gt;
+
+&lt;p&gt;即主题内部高内聚、 不同主题间低耦合。明细层按照业务过程划分主题，汇总层按照“实体+ 活动”划分不同分析主题，应用层根据应用需求划分不同应用主题。&lt;/p&gt;
+
+&lt;p&gt;2) 核心模型和扩展模型要分离&lt;/p&gt;
+
+&lt;p&gt;建立核心模型与扩展模型体系，核心模型包括的字段支持常用的核心业务，扩展模型包括的字段支持个性化或少量应用的需要，不能让扩展模型的字段过度侵入核心模型，以免破坏核心模型的架构简洁性与可维护性。&lt;/p&gt;
+
+&lt;p&gt;3) 公共处理逻辑下沉及单一&lt;/p&gt;
+
+&lt;p&gt;越是底层公用的处理逻辑越应该在数据调度依赖的底层进行封装与实现，不要让公用的处理逻辑暴露给应用实现，不要让公共逻辑多处同时存在。&lt;/p&gt;
+
+&lt;p&gt;4) 成本与性能平衡&lt;/p&gt;
+
+&lt;p&gt;适当的数据冗余可换取查询和刷新性能，不宜过度冗余与数据复制。&lt;/p&gt;
+
+&lt;p&gt;5) 数据可回滚&lt;/p&gt;
+
+&lt;p&gt;处理逻辑不变，在不同时间多次运行数据结果确定不变。&lt;/p&gt;
+
+&lt;h2 id=&quot;三数仓公共开发规范&quot;&gt;三、数仓公共开发规范&lt;/h2&gt;
+
+&lt;h3 id=&quot;31-层次调用规范&quot;&gt;3.1 层次调用规范&lt;/h3&gt;
+
+&lt;p&gt;稳定业务按照标准的数据流向进行开发，即 ODS –&amp;gt; DWD –&amp;gt; DWS –&amp;gt; APP。非稳定业务或探索性需求，可以遵循 ODS -&amp;gt; DWD -&amp;gt; APP 或者 ODS -&amp;gt; DWD -&amp;gt; DWM -&amp;gt;APP 两个模型数据流。&lt;/p&gt;
+
+&lt;p&gt;在保障了数据链路的合理性之后，也必须保证模型分层引用原则：&lt;/p&gt;
+
+&lt;p&gt;正常流向：ODS -&amp;gt; DWD -&amp;gt; DWM -&amp;gt; DWS -&amp;gt; APP，当出现 ODS -&amp;gt; DWD -&amp;gt; DWS -&amp;gt; APP&lt;/p&gt;
+
+&lt;p&gt;这种关系时，说明主题域未覆盖全。应将 DWD 数据落到 DWM 中，对于使用频度非常低的表允许 DWD -&amp;gt; DWS。&lt;/p&gt;
+
+&lt;p&gt;尽量避免出现 DWS 宽表中使用 DWD 又使用（该 DWD 所归属主题域）DWM 的表。&lt;/p&gt;
+
+&lt;p&gt;同一主题域内对于 DWM 生成 DWM 的表，原则上要尽量避免，否则会影响 ETL 的效率。
+    DWM、DWS 和 APP 中禁止直接使用 ODS 的表， ODS 的表只能被 DWD 引用。
+    禁止出现反向依赖，例如 DWM 的表依赖 DWS 的表。&lt;/p&gt;
+
+&lt;h3 id=&quot;32-数据类型规范&quot;&gt;3.2 数据类型规范&lt;/h3&gt;
+
+&lt;p&gt;需统一规定不同的数据的数据类型，严格按照规定的数据类型执行：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;类型&lt;/th&gt;
+      &lt;th&gt;说明&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;金额&lt;/td&gt;
+      &lt;td&gt;使用 decimal(28,6) 控制精度等，明确单位是分还是元&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;字符串&lt;/td&gt;
+      &lt;td&gt;string&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;id类&lt;/td&gt;
+      &lt;td&gt;bigint&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;时间&lt;/td&gt;
+      &lt;td&gt;string,明确时间定义的格式&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;状态&lt;/td&gt;
+      &lt;td&gt;string&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;33-数据冗余规范&quot;&gt;3.3 数据冗余规范&lt;/h3&gt;
+
+&lt;p&gt;宽表的冗余字段要确保：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;冗余字段要&lt;strong&gt;使用高频，下游3个或以上使用&lt;/strong&gt;。&lt;/li&gt;
+  &lt;li&gt;冗余字段引入&lt;strong&gt;不应造成本身数据产生过多的延后&lt;/strong&gt;。&lt;/li&gt;
+  &lt;li&gt;冗余字段和已有字段的&lt;strong&gt;重复率不应过大，原则上不应超过60%&lt;/strong&gt;，如需要可以选择join或原表拓展。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;34-null字段处理规范&quot;&gt;3.4 NULL字段处理规范&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;维度字段，需设置为-1&lt;/li&gt;
+  &lt;li&gt;指标字段，需设置为 0&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;35-指标口径规范&quot;&gt;3.5 指标口径规范&lt;/h3&gt;
+
+&lt;p&gt;保证主题域内，指标口径一致，无歧义。&lt;/p&gt;
+
+&lt;p&gt;通过数据分层，提供统一的数据出口，统一对外输出的数据口径，避免同一指标不同口径的情况发生。&lt;/p&gt;
+
+&lt;p&gt;1) 指标梳理&lt;/p&gt;
+
+&lt;p&gt;指标口径的不一致使得数据使用的成本极高，经常出现口径打架、反复核对数据的问题。在数据治理中，我们将需求梳理到的所有指标进行进一步梳理，明确其口径，&lt;strong&gt;如果存在两个指标名称相同，但口径不一致，先判断是否是进行合并，如需要同时存在，那么在命名上必须能够区分开&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;2) 指标管理&lt;/p&gt;
+
+&lt;p&gt;指标管理分为&lt;strong&gt;原子指标维护&lt;/strong&gt;和&lt;strong&gt;派生指标维护&lt;/strong&gt;。&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;原子指标：
+    &lt;ul&gt;
+      &lt;li&gt;选择原子指标的归属产线、业务板块、数据域、业务过程&lt;/li&gt;
+      &lt;li&gt;选择原子指标的统计数据来源于该业务过程下的原始数据源&lt;/li&gt;
+      &lt;li&gt;录入原子指标的英文名称、中文名称、概述&lt;/li&gt;
+      &lt;li&gt;填写指标函数&lt;/li&gt;
+      &lt;li&gt;系统根据指标函数自动生成原子指标的定义表达式&lt;/li&gt;
+      &lt;li&gt;系统根据指标定义表达式以及数据源表生成原子指标SQL&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;派生指标：
+  在原子指标的基础之上选择了一些维度或者修饰限定词。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;36-数据表处理规范&quot;&gt;3.6 数据表处理规范&lt;/h3&gt;
+
+&lt;p&gt;1) 增量表&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;新增数据，增量数据是上次导出之后的新数据。&lt;/li&gt;
+  &lt;li&gt;记录每次增加的量，而不是总量；&lt;/li&gt;
+  &lt;li&gt;增量表，只报变化量，无变化不用报；&lt;/li&gt;
+  &lt;li&gt;每天一个分区。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;2) 全量表&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;每天的所有的最新状态的数据。&lt;/li&gt;
+  &lt;li&gt;全量表，有无变化，都要报；&lt;/li&gt;
+  &lt;li&gt;每次上报的数据都是所有的数据（变化的 + 没有变化的）；&lt;/li&gt;
+  &lt;li&gt;只有一个分区。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;3) 快照表&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;按日分区，记录截止数据日期的全量数据。&lt;/li&gt;
+  &lt;li&gt;快照表，有无变化，都要报；&lt;/li&gt;
+  &lt;li&gt;每次上报的数据都是所有的数据（变化的 + 没有变化的）；&lt;/li&gt;
+  &lt;li&gt;一天一个分区。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;4) 拉链表&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;记录截止数据日期的全量数据。&lt;/li&gt;
+  &lt;li&gt;记录一个事物从开始，一直到当前状态的所有变化的信息；&lt;/li&gt;
+  &lt;li&gt;拉链表每次上报的都是历史记录的最终状态，是记录在当前时刻的历史总 量；&lt;/li&gt;
+  &lt;li&gt;当前记录存的是当前时间之前的所有历史记录的最后变化量（总量）；&lt;/li&gt;
+  &lt;li&gt;只有一个分区。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;37-表的生命周期管理&quot;&gt;3.7 表的生命周期管理&lt;/h3&gt;
+
+&lt;p&gt;这部分主要是要通过对历史数据的等级划分与对表类型的划分生成相应的生命周期管理矩阵。&lt;/p&gt;
+
+&lt;p&gt;1) 历史数据等级划分
+主要将历史数据划分P0、Pl、P2、P3 四个等级，其具体定义如下：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;P0 ：非常重要的主题域数据和非常重要的应用数据，具有不可恢复性，如交易、日志、集团 KPI 数据、 IPO 关联表。&lt;/li&gt;
+  &lt;li&gt;Pl ：重要的业务数据和重要的应用数据，具有不可恢复性，如重要的业务产品数据。&lt;/li&gt;
+  &lt;li&gt;P2 ：重要的业务数据和重要的应用数据，具有可恢复性，如交易线 ETL 产生的中间过程数据。&lt;/li&gt;
+  &lt;li&gt;P3 ：不重要的业务数据和不重要的应用数据，具有可恢复性，如某些 SNS 产品报表。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;2) 表类型划分&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;事件型流水表（增量表）指数据无重复或者无主键数据，如日志。&lt;/li&gt;
+  &lt;li&gt;事件型镜像表（增量表）指业务过程性数据，有主键，但是对于同样主键的属性会发生缓慢变化，如交易、订单状态与时间会根据业务发生变更。&lt;/li&gt;
+  &lt;li&gt;维表:维表包括维度与维度属性数据，如用户表、商品表。&lt;/li&gt;
+  &lt;li&gt;Merge 全量表包括业务过程性数据或者维表数据。由于数据本身有新增的或者发生状态变更，对于同样主键的数据可能会保留多份，因此可以对这些数据根据主键进行 Merge 操作，主键对应的属性只会保留最新状态，历史状态保留在前一天分区 中。例如，用户表、交易表等都可以进行 Merge 操作&lt;/li&gt;
+  &lt;li&gt;ETL 临时表是指 ETL 处理过程中产生的临时表数据，一般不建议保留，最多7天。&lt;/li&gt;
+  &lt;li&gt;TT 拉取的数据和 DbSync 产生的临时数据最终会流转到 DS 层，ODS 层数据作为原始数据保留下来，从而使得 TT&amp;amp;DbSync 上游数据成为临时数据。这类数据不建议保留很长时间，生命周期默认设置为 93天，可以根据实际情况适当减少保留天数。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;38-普通全量表&quot;&gt;3.8 普通全量表&lt;/h3&gt;
+
+&lt;p&gt;很多小业务数据或者产品数据，BI一般是直接全量拉取，这种方式效率快，对存储压力也不是很大，而且表保留很长时间，可以根据历史数据等级确定保留策略。&lt;/p&gt;
+
+&lt;h2 id=&quot;四数仓各层开发规范&quot;&gt;四、数仓各层开发规范&lt;/h2&gt;
+&lt;h3 id=&quot;41-ods层设计规范&quot;&gt;4.1 ODS层设计规范&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;同步规范：
+一个系统源表只允许同步一次；
+全量初始化同步和增量同步处理逻辑要清晰；
+以统计日期和时间进行分区存储；
+目标表字段在源表不存在时要自动填充处理。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;表分类与生命周期：
+    &lt;ol&gt;
+      &lt;li&gt;
+        &lt;p&gt;ods流水全量表：&lt;/p&gt;
+
+        &lt;p&gt;不可再生的永久保存；
+ 日志可按留存要求；
+ 按需设置保留特殊日期数据；
+ 按需设置保留特殊月份数据；&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;ods镜像型全量表：&lt;/p&gt;
+
+        &lt;p&gt;推荐按天存储；
+ 对历史变化进行保留；
+ 最新数据存储在最大分区；
+ 历史数据按需保留；&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;ods增量数据：
+ 推荐按天存储；
+ 有对应全量表的，建议只保留14天数据；
+ 无对应全量表的，永久保留；&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;ods的etl过程中的临时表：
+ 推荐按需保留；
+ 最多保留7天；
+ 建议用完即删，下次使用再生成；&lt;/li&gt;
+      &lt;li&gt;BDSync非去重数据：
+ 通过中间层保留，默认用完即删，不建议保留。&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;数据质量：&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;全量表必须配置唯一性字段标识；&lt;/li&gt;
+      &lt;li&gt;对分区空数据进行监控；&lt;/li&gt;
+      &lt;li&gt;对枚举类型字段，进行枚举值变化和分布监控；&lt;/li&gt;
+      &lt;li&gt;ods表数据量级和记录数做环比监控；&lt;/li&gt;
+      &lt;li&gt;ods全表都必须要有注释；&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;42-公共维度层设计规范&quot;&gt;4.2 公共维度层设计规范&lt;/h3&gt;
+&lt;p&gt;1) 设计准则&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;一致性
+&lt;strong&gt;共维度在不同的物理表中的字段名称、数据类型、数据内容必须保持一致&lt;/strong&gt;（历史原因不一致，要做好&lt;strong&gt;版本控制&lt;/strong&gt;）
+维度的组合与拆分&lt;/li&gt;
+  &lt;li&gt;组合原则：
+将维度与关联性强的字段进行组合，一起查询，一起展示，两个维度必须具有天然的关系，如：商品的基本属性和所属品牌。&lt;/li&gt;
+  &lt;li&gt;无相关性：如一些使用频率较小的杂项维度，可以构建一个集合杂项维度的特殊属性。&lt;/li&gt;
+  &lt;li&gt;行为维度：经过计算的度量，但下游当维度处理，例：点击量 0-1000,100-1000等，可以做聚合分类。
+拆分与冗余：
+针对重要性，业务相关性、源、使用频率等可分为核心表、扩展表。
+数据记录较大的维度，可以适当冗余一些子集。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;2) 存储及生命周期管理
+建议按天分区。&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=4天时，建议保留最近7天分区；&lt;/li&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=12天时，建议保留最近15天分区；&lt;/li&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=30天时，建议保留最近33天分区；&lt;/li&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=90天时，建议保留最近120天分区；&lt;/li&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=180天时，建议保留最近240天分区；&lt;/li&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=300天时，建议保留最近400天分区；&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;43-dwd明细层设计规范&quot;&gt;4.3 DWD明细层设计规范&lt;/h3&gt;
+
+&lt;p&gt;1) 存储及生命周期管理
+建议按天分区。&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=4天时，建议保留最近7天分区；&lt;/li&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=12天时，建议保留最近15天分区；&lt;/li&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=30天时，建议保留最近33天分区；&lt;/li&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=90天时，建议保留最近120天分区；&lt;/li&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=180天时，建议保留最近240天分区；&lt;/li&gt;
+  &lt;li&gt;3个月内最大访问跨度&amp;lt;=300天时，建议保留最近400天分区；&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;2) 事务型事实表设计准则&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;基于数据应用需求的分析设计事务型事实表，结合下游较大的针对某个业务过程和分析指标需求，可考虑基于某个事件过程构建事务型实时表；&lt;/li&gt;
+  &lt;li&gt;一般选用事件的发生日期或时间作为分区字段，便于扫描和裁剪；&lt;/li&gt;
+  &lt;li&gt;冗余子集原则，有利于降低后续IO开销；&lt;/li&gt;
+  &lt;li&gt;明细层事实表维度退化，减少后续使用join成本。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;3) 周期快照事实表
+周期快照事实表中的每行汇总了发生在某一标准周期，如某一天、某周、某月的多个度量事件。&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;粒度是周期性的，不是个体的事务。&lt;/li&gt;
+  &lt;li&gt;通常包含许多事实，因为任何与事实表粒度一致的度量事件都是被允许的。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;4) 累积快照事实表
+多个业务过程联合分析而构建的事实表，如采购单的流转环节。&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;用于分析事件时间和时间之间的间隔周期。&lt;/li&gt;
+  &lt;li&gt;少量的且当前事务型不支持的，如关闭、发货等相关的统计。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;44-dws公共汇总层设计规范&quot;&gt;4.4 DWS公共汇总层设计规范&lt;/h3&gt;
+
+&lt;p&gt;数据仓库的性能是数据仓库建设是否成功的重要标准之一。聚集主要是通过汇总明细粒度数据来获得改进查询性能的效果。通过访问聚集数据，可以减少数据库在响应查询时必须执行的工作量，能够快速响应用户的查询，同时有利于减少不同用访问明细数据带来的结果不一致问题。&lt;/p&gt;
+
+&lt;p&gt;1) 聚集的基本原则&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;一致性。聚集表必须提供与查询明细粒度数据一致的查询结果。&lt;/li&gt;
+  &lt;li&gt;避免单一表设计。不要在同一个表中存储不同层次的聚集数据。&lt;/li&gt;
+  &lt;li&gt;聚集粒度可不同。聚集并不需要保持与原始明细粒度数据一样的粒度，聚集只关心所需要查询的维度。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;2) 聚集的基本步骤&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;第一步：确定聚集维度
+在原始明细模型中会存在多个描述事实的维度，如日期、商品类别、卖家等，这时候需要确定根据什么维度聚集，如果只关心商品的交易额情况，那么就可以根据商品维度聚集数据。&lt;/li&gt;
+  &lt;li&gt;第二步：确定一致性上钻
+这时候要关心是按月汇总还是按天汇总，是按照商品汇总还是按照类目汇总，如果按照类目汇总，还需要关心是按照大类汇总还是小类汇总。当然，我们要做的只是了解用户需要什么，然后按照他们想要的进行聚集。&lt;/li&gt;
+  &lt;li&gt;第三步：确定聚集事实
+在原始明细模型中可能会有多个事实的度量，比如在交易中有交易额、交易数量等，这时候要明确是按照交易额汇总还是按照成交数量汇总。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;3) 公共汇总层设计原则
+除了聚集基本的原则外，公共汇总层还必须遵循以下原则：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;数据公用性。汇总的聚集会有第三者使用吗？基于某个维度的聚集是不是经常用于数据分析中？如果答案是肯定的，那么就有必要把明细数据经过汇总沉淀到聚集表中。&lt;/li&gt;
+  &lt;li&gt;不跨数据域。数据域是在较高层次上对数据进行分类聚集的抽象。如以业务&lt;/li&gt;
+  &lt;li&gt;区分统计周期。在表的命名上要能说明数据的统计周期，如 _Id表示最近1天，_td 表示截至当天，_nd 表示最近N天。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;五数仓命名规范&quot;&gt;五、数仓命名规范&lt;/h2&gt;
+
+&lt;h3 id=&quot;51-词根设计规范&quot;&gt;5.1 词根设计规范&lt;/h3&gt;
+
+&lt;p&gt;词根属于数仓建设中的规范，属于元数据管理的范畴，现在把这个划到数据治理的一部分。完整的数仓建设是包含数据治理的，只是现在谈到数仓偏向于数据建模， 而谈到数据治理，更多的是关于数据规范、数据管理。&lt;/p&gt;
+
+&lt;p&gt;表命名，其实在很大程度上是对元数据描述的一种体现，表命名规范越完善，我 们能从表名获取到的信息就越多。比如：一部分业务是关于货架的，英文名是：rack， rack 就是一个词根，那我们就在所有的表、字段等用到的地方都叫 rack，不要叫成 别的什么。这就是词根的作用，用来统一命名，表达同一个含义。&lt;/p&gt;
+
+&lt;p&gt;指标体系中有很多“率”的指标，都可以拆解成 XXX+率，率可以叫 rate，那我 们所有的指标都叫做 XXX+rate。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;词根&lt;/strong&gt;：可以用来统一表名、字段名、主题域名等等。&lt;/p&gt;
+
+&lt;p&gt;举例：以流程图的方式来展示，更加直观和易懂，本图侧重 dwm 层表的命名 规范，其余命名是类似的道理：
+&lt;img src=&quot;/assets/images/post/datawarehousetablename.jpg&quot; alt=&quot;命名选择规则&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;第一个判断条件是该表的用途，是中间表、原始日志还是业务展示用的表&lt;/p&gt;
+
+&lt;p&gt;如果该表被判断为中间表，就会走入下一个判断条件：表是否有 group 操作 &lt;strong&gt;通过是否有 group 操作来判断该表该划分在 dwd 层还是 dwm 和 dws 层&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;如果不是 dwd 层，则需要判断该表是否是多个行为的汇总表（即宽表） 最后再分别填上事业群、部门、业务线、自定义名称和更新频率等信息即可。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;分层：表的使用范围&lt;/li&gt;
+  &lt;li&gt;事业群和部门：生产该表或者该数据的团队&lt;/li&gt;
+  &lt;li&gt;业务线：表明该数据是哪个产品或者业务线相关&lt;/li&gt;
+  &lt;li&gt;主题域：分析问题的角度，对象实体&lt;/li&gt;
+  &lt;li&gt;自定义：一般会尽可能多描述该表的信息，比如活跃表、留存表等&lt;/li&gt;
+  &lt;li&gt;更新周期：比如说天级还是月级更新&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;数仓表的命名规范如下：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;数仓层次:
+    &lt;ul&gt;
+      &lt;li&gt;公用维度：dim&lt;/li&gt;
+      &lt;li&gt;DM层：dm&lt;/li&gt;
+      &lt;li&gt;ODS层：ods&lt;/li&gt;
+      &lt;li&gt;DWD层：dwd&lt;/li&gt;
+      &lt;li&gt;DWS层：dws&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;周期/数据范围：
+    &lt;ul&gt;
+      &lt;li&gt;日快照：d&lt;/li&gt;
+      &lt;li&gt;增量：i&lt;/li&gt;
+      &lt;li&gt;全量：f&lt;/li&gt;
+      &lt;li&gt;周：w&lt;/li&gt;
+      &lt;li&gt;拉链表：l&lt;/li&gt;
+      &lt;li&gt;非分区全量表：a&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;52-表命名规范&quot;&gt;5.2 表命名规范&lt;/h3&gt;
+
+&lt;p&gt;1) 常规表&lt;/p&gt;
+
+&lt;p&gt;常规表是我们需要固化的表，是正式使用的表，是目前一段时间内需要去维护去 完善的表。&lt;/p&gt;
+
+&lt;p&gt;规范：分层前缀[dwd|dws|ads]_部门_业务域_主题域_XXX_更新周期|数据范围
+业务域、主题域我们都可以用词根的方式枚举清楚，不断完善。&lt;/p&gt;
+
+&lt;p&gt;更新周期主要的是时间粒度、日、月、年、周等。&lt;/p&gt;
+
+&lt;p&gt;2) 中间表&lt;/p&gt;
+
+&lt;p&gt;中间表一般出现在 Job 中，是 Job 中临时存储的中间数据的表，中间表的作 用域只限于当前 Job 执行过程中，Job 一旦执行完成，该中间表的使命就完 成了，是可以删除的（按照自己公司的场景自由选择，以前公司会保留几天 的中间表数据，用来排查问题）。&lt;/p&gt;
+
+&lt;p&gt;规范：mid_table_name_[0~9|dim]
+table_name 是我们任务中目标表的名字，通常来说一个任务只有一个目标表。这里加上表名，是为了防止自由发挥的时候表名冲突，而末尾大家可以选择自由发挥，起一些有意义的名字，或者简单粗暴，使用数字代替，各有优劣吧，谨慎选择。&lt;/p&gt;
+
+&lt;p&gt;通常会遇到需要补全维度的表，这里使用 dim 结尾。&lt;/p&gt;
+
+&lt;p&gt;如果要保留历史的中间表，可以加上日期或者时间戳。&lt;/p&gt;
+
+&lt;p&gt;3) 临时表&lt;/p&gt;
+
+&lt;p&gt;临时表是临时测试的表，是临时使用一次的表，就是暂时保存下数据看看，后续一般不再使用的表，是可以随时删除的表。&lt;/p&gt;
+
+&lt;p&gt;规范：tmp_xxx&lt;/p&gt;
+
+&lt;p&gt;只要加上 tmp 开头即可，其他名字随意，注意 tmp 开头的表不要用来实际使用，只是测试验证而已。&lt;/p&gt;
+
+&lt;p&gt;4) 维度表&lt;/p&gt;
+
+&lt;p&gt;维度表是基于底层数据，抽象出来的描述类的表。维度表可以自动从底层表抽象出来，也可以手工来维护。&lt;/p&gt;
+
+&lt;p&gt;规范：dim_xxx&lt;/p&gt;
+
+&lt;p&gt;维度表，统一以 dim 开头，后面加上，对该指标的描述。&lt;/p&gt;
+
+&lt;p&gt;5) 手工表&lt;/p&gt;
+
+&lt;p&gt;手工表是手工维护的表，手工初始化一次之后，一般不会自动改变，后面变更，也是手工来维护。&lt;/p&gt;
+
+&lt;p&gt;一般来说，手工的数据粒度是偏细的，所以暂时统一放在 dwd 层，后面如果有目标值或者其他类型手工数据，再根据实际情况分层。&lt;/p&gt;
+
+&lt;p&gt;规范：dwd_业务域_manual_xxx&lt;/p&gt;
+
+&lt;p&gt;手工表，增加特殊的主题域，manual，表示手工维护表。&lt;/p&gt;
+
+&lt;h3 id=&quot;53-指标命名规范&quot;&gt;5.3 指标命名规范&lt;/h3&gt;
+
+&lt;h4 id=&quot;1-公共规则&quot;&gt;1) 公共规则&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;所有单词小写&lt;/li&gt;
+  &lt;li&gt;单词之间下划线分割（反例：appName 或 AppName）&lt;/li&gt;
+  &lt;li&gt;可读性优于长度 (词根，避免出现同一个指标，命名一致性)&lt;/li&gt;
+  &lt;li&gt;禁止使用 sql 关键字，如字段名与关键字冲突时 +col&lt;/li&gt;
+  &lt;li&gt;数量字段后缀 _cnt 等标识…&lt;/li&gt;
+  &lt;li&gt;金额字段后缀 _price 标识&lt;/li&gt;
+  &lt;li&gt;天分区使用字段 dt，格式统一（yyyymmdd 或 yyyy-mm-dd）&lt;/li&gt;
+  &lt;li&gt;小时分区使用字段 hh，范围（00-23）&lt;/li&gt;
+  &lt;li&gt;分钟分区使用字段 mi，范围（00-59）&lt;/li&gt;
+  &lt;li&gt;布尔类型标识：is_{业务}，不允许出现空值&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;2-指标命名规范&quot;&gt;2) 指标命名规范&lt;/h4&gt;
+
+&lt;p&gt;结合指标的特性以及词根管理规范，将指标进行结构化处理。&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;基础指标词根，即所有指标必须包含以下基础词根：&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;业务修饰词，用于描述业务场景的词汇，例如trade-交易。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;日期修饰词，用于修饰业务发生的时间区间。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;聚合修饰词，对结果进行聚集操作。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;基础指标，单一的业务修饰词+基础指标词根构建基础指标 ，例如：交易金额-trade_amt。&lt;/li&gt;
+  &lt;li&gt;派生指标，多修饰词+基础指标词根构建派生指标。派生指标继承基础指标的特性，例如：安装门店数量-install_poi_cnt。&lt;/li&gt;
+  &lt;li&gt;普通指标命名规范，与字段命名规范一致，由词汇转换即可以。&lt;/li&gt;
+&lt;/ol&gt;</content><author><name>zhoubin</name></author><category term="数仓" /><category term="指南" /><summary type="html">一、数据模型架构原则</summary></entry><entry><title type="html">MySql 8.0 常用 hint</title><link href="https://zmngw.github.io/2023/10/21/MySql-8.0-Hint/" rel="alternate" type="text/html" title="MySql 8.0 常用 hint" /><published>2023-10-21T00:00:00+08:00</published><updated>2023-10-21T00:00:00+08:00</updated><id>https://zmngw.github.io/2023/10/21/MySql%208.0%20Hint</id><content type="html" xml:base="https://zmngw.github.io/2023/10/21/MySql-8.0-Hint/">&lt;p&gt;每个程序员都喜欢优化，甚至有时我们知道不应该去做。为了满足大家的意愿，MySQL提供了一些关键字，在SQL语句中使用这些关键字，可以使得数据库按照明确的优化指令执行SQL语句。&lt;/p&gt;
+
+&lt;p&gt;应当指出的是，不正确的使用hints很有可能使你的查询语句表现的更糟糕，在使用hints之前需要确保这是有意义的。通常你可以使用explain查看执行计划并阅读hint文档来决定是否用它。&lt;/p&gt;
+
+&lt;p&gt;使用SQL注释括住hints也是一个好方法，比如&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;cm&quot;&gt;/*+ SQL_NO_CACHE */&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;columns&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;table&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这可以使你的应用得到更大的兼容性。&lt;/p&gt;
+
+&lt;p&gt;下面介绍一些常用的MySQL优化hints。&lt;/p&gt;
+&lt;h4 id=&quot;并行查询&quot;&gt;并行查询&lt;/h4&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cm&quot;&gt;/*+ PQ() */&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;/*+ NO_PQ(t1,t2) */&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;取消合并优化&quot;&gt;取消合并优化&lt;/h4&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cm&quot;&gt;/*+ no_merage() */&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;指定主驱动表&quot;&gt;指定主驱动表&lt;/h4&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cm&quot;&gt;/*+ join_prefix(d) */&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;sql_no_cache&quot;&gt;SQL_NO_CACHE&lt;/h4&gt;
+
+&lt;p&gt;SQL_NO_CACHE hint 会使用特殊的查询来关闭MySQL内置的查询缓存机制。在动态性很强或者执行频率很低的查询上使用SQL_NO_CACHE hint，可以帮助MySQL提高缓存的使用效率。不过确保在使用SQL_NO_CACHE hint时，MySQL已经开启了查询缓存，否则没有必要使用。&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SQL_NO_CACHE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;field1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;field2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;sql_cache&quot;&gt;SQL_CACHE&lt;/h4&gt;
+
+&lt;p&gt;如果你已经配置了query_cache_type = 2(仅在使用SQL_CACHE时进行缓冲)，那么可以使用SQL_CACHE hint来告诉MySQL哪些查询需要进行缓存。&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SQL_CALHE&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;high_priority&quot;&gt;HIGH_PRIORITY&lt;/h4&gt;
+
+&lt;p&gt;在SELECT 或者 INSERT语句中使用 HIGH_PRIORITY hint可以告诉MySQL这是一个高优先级的查询。这个hint允许此查询跳过优先级较低的语句而得到优先执行。&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HIGH_PRIORITY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;low_priority&quot;&gt;LOW_PRIORITY&lt;/h4&gt;
+
+&lt;p&gt;LOW_PRIORITY hint 可以使用在INSERT 和 UPDATE语句中.如果你使用LOW_PRIORITY 关键字，语句的执行会被延迟到没有其他的读请求时才执行。这意味着你可能等待很长一段时间，甚至在读请求为主的服务器上发生永久等待。&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;update&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LOW_PRIORITY&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;table1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;field1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;field1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;insert-delayed&quot;&gt;INSERT DELAYED&lt;/h4&gt;
+
+&lt;p&gt;一个INSERT LOW_PRIORITY 语句在其得到真正执行之前，不会做任何返回，如果你想立即获得返回值，可以使用INSERT DELAYED 语句。INSERT DELAYED 语句会立即返回，但是依然等到其他客户端关闭了数据表后才执行。&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;INSERT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DELAYED&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INTO&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;table1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xxx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;关于MySQL Insert Delayed的更多信息可以查看这里&lt;/p&gt;
+
+&lt;p&gt;注意：INSERT DELAYED 只作用于MyISAM、MEMORY和ARCHIVE表。&lt;/p&gt;
+
+&lt;h4 id=&quot;straight_join&quot;&gt;STRAIGHT_JOIN&lt;/h4&gt;
+
+&lt;p&gt;STRAIGHT_JOIN hint告诉MySQL使用FROM从句的顺序来进行表连接。&lt;/p&gt;
+
+&lt;p&gt;使用EXPLAIN 来明确MySQL没有指出这个最佳的连接顺序。如果你指定了一个不佳的顺序，可能会使MySQL做很多无需做的工作。&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FIELD1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FIELD2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;STRAIGHT_JOIN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xxx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;sql_buffer_result&quot;&gt;SQL_BUFFER_RESULT&lt;/h4&gt;
+
+&lt;p&gt;SQL_BUFFER_RESULT hint告诉MySQL将查询的结果放入到临时表中，这样当查询结果还在输出时,就可以解除锁定的数据表。因此你可能只需要在结果集很大的时候使用SQL_BUFFER_RESULT hint。&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SQL_BUFFER_RESULT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;sql_big_result&quot;&gt;SQL_BIG_RESULT&lt;/h4&gt;
+
+&lt;p&gt;SQL_BIG_RESULT hint 能够与DISTINCT 和 GROUP BY SELECT 语句一起使用，它会告诉MySQL结果集可能会很大。根据MySQL文档，如果使用了这个hint，那么在需要时，MySQL会直接使用磁盘临时表，并且使用GROUP BY的元素关键字对临时表进行排序。&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SQL_BIG_RESULT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;sql_small_result&quot;&gt;SQL_SMALL_RESULT&lt;/h4&gt;
+
+&lt;p&gt;SQL_SMALL_RESULT基本上与SQL_BIG_RESULT相反。当使用了SQL_SMALL_RESULT时，MySQL使用内存临时表来存储结果而不会进行非索引排序。因此通常这是默认的优化选项，这个hint通常无需使用。&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SQL_SMALL_RESULT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;force-index&quot;&gt;FORCE INDEX&lt;/h4&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FORCE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INDEX&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FIELD1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;以上的SQL语句只使用建立在FIELD1上的索引，而不使用其它字段上的索引。&lt;/p&gt;
+
+&lt;h4 id=&quot;ignore-index&quot;&gt;IGNORE INDEX&lt;/h4&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TABLE1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;IGNORE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INDEX&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FIELD1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FIELD2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;在上面的SQL语句中，TABLE1表中FIELD1和FIELD2上的索引不被使用。&lt;/p&gt;
+
+&lt;h4 id=&quot;join-order-optimizer-hints-连接顺序相关的&quot;&gt;Join-Order Optimizer Hints –连接顺序相关的&lt;/h4&gt;
+
+&lt;p&gt;预先创建2张表&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql&amp;gt; create table tt1 (id int not null primary key, name varchar(20));
+Query OK, 0 rows affected (0.01 sec)
+
+
+mysql&amp;gt; create table tt2 (id int not null primary key, name varchar(20));
+Query OK, 0 rows affected (0.02 sec)
+
+
+mysql&amp;gt; insert into tt1 values (1,&apos;tt1&apos;);
+Query OK, 1 row affected (0.00 sec)
+
+
+mysql&amp;gt; insert into tt2 values (1,&apos;tt2&apos;);
+Query OK, 1 row affected (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;我们先看着几个hint :&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;JOIN_ORDER: 指定表的连接顺序&lt;/li&gt;
+  &lt;li&gt;JOIN_PREFIX: 设定第一个表顺序(主驱动表)&lt;/li&gt;
+  &lt;li&gt;JOIN_SUFFIX: 设定最后一个表的顺序&lt;/li&gt;
+  &lt;li&gt;JOIN_FIXED_ORDER: 按照SQL写的&lt;strong&gt;顺序连接&lt;/strong&gt; 类似于 STRAIGHT_JOIN&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;JOIN_ORDER：，来固定表的连接顺序 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tt2-&amp;gt;tt1&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;explain&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;select&lt;/span&gt; &lt;span class=&quot;cm&quot;&gt;/*+ join_order(tt2,tt1) */&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;+----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt2   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt1   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt2.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 1 warning (0.01 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;我们再次反过来， 来固定表的连接顺序 tt1-&amp;gt;tt2&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;explain&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;select&lt;/span&gt; &lt;span class=&quot;cm&quot;&gt;/*+ join_order(tt1,tt2) */&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;--------------&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;+----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt1   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt2   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt1.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;JOIN_PREFIX: 设定第一个表(主驱动表)顺序 ， 我们来固定 tt2 作为驱动表&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;explain&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;select&lt;/span&gt; &lt;span class=&quot;cm&quot;&gt;/*+ JOIN_PREFIX(tt2) */&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;+----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt2   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt1   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt2.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;JOIN_SUFFIX： 设定最后一个表的顺序， 我们来固定 tt2 作为被驱动表&lt;/p&gt;
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;explain&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/*+ JOIN_SUFFIX(tt2) */&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tt1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tt2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;+----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt1   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt2   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt1.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;JOIN_FIXED_ORDER: 按照SQL写的顺序连接 类似于 STRAIGHT_JOIN ， 是按照where 语句后面SQL写的顺序，来连接。&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;from tt1,tt2 --》 tt1连tt2
+from tt2,tt1 --》 tt2连tt1
+
+root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain select /*+ JOIN_FIXED_ORDER*/ tt1.*,tt2.* from tt1,tt2 where tt1.id =tt2.id;
+
+--------------
+explain select /*+ JOIN_FIXED_ORDER */ tt1.*,tt2.* from tt1,tt2 where tt1.id =tt2.id
+--------------
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;+----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt1   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt2   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt1.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 2 warnings (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain select/*+ JOIN_FIXED_ORDER */ tt1.*,tt2.* from tt2,tt1 where tt1.id =tt2.id;
+--------------
+explain  select/*+ JOIN_FIXED_ORDER */ tt1.*,tt2.* from tt2,tt1 where tt1.id =tt2.id
+--------------
+
+
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys | key     | key_len | ref           | rows | filtered | Extra |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+|  1 | SIMPLE      | tt2   | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL          |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | tt1   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | testdb.tt2.id |    1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+---------------+---------+---------+---------------+------+----------+-------+
+2 rows in set, 2 warnings (0.01 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;index-level-optimizer-hints-索引级别的&quot;&gt;Index-Level Optimizer Hints –索引级别的&lt;/h4&gt;
+
+&lt;p&gt;我们继续看一下索引级别的几个hint:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;INDEX, NO_INDEX: 指定固定的索引访问&lt;/li&gt;
+  &lt;li&gt;INDEX_MERGE, NO_INDEX_MERGE: 指定索引之间是否进行交，并集的操作&lt;/li&gt;
+  &lt;li&gt;JOIN_INDEX, NO_JOIN_INDEX： 指定表连接之间是否是走索引连接&lt;/li&gt;
+  &lt;li&gt;MRR, NO_MRR: 是否启用multiple range read&lt;/li&gt;
+  &lt;li&gt;NO_ICP: 关闭索引下推&lt;/li&gt;
+  &lt;li&gt;NO_RANGE_OPTIMIZATION: 关闭索引范围的扫描&lt;/li&gt;
+  &lt;li&gt;ORDER_INDEX, NO_ORDER_INDEX: 是否通过指定的索引来排序&lt;/li&gt;
+  &lt;li&gt;SKIP_SCAN, NO_SKIP_SCAN: 是否进行索引的跳跃扫描&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;INDEX, NO_INDEX: 是否指定固定的索引访问 ：&lt;/p&gt;
+
+&lt;p&gt;我们来看一下这条语句：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;explain select * from t2 where id &amp;gt; 10 and a &amp;gt;20;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;很显然走主键索引是最正确的选择 -&amp;gt; （PRIMARY）&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain select  *  from t2 where id &amp;gt; 10 and a &amp;gt;20;
+--------------
+explain select  *  from t2 where id &amp;gt; 10 and a &amp;gt;20
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+| id | select_type | table | partitions | type  | possible_keys | key     | key_len | ref  | rows   | filtered | Extra       |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+|  1 | SIMPLE      | t2    | NULL       | range | PRIMARY,a     | PRIMARY | 4       | NULL | 499193 |    50.00 | Using where |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;我们还可以通过hint -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/*+ index(t2 a) */&lt;/code&gt; 让MYSQL优化器走索引 a, 虽然这不是优化器最优的选择：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain select/*+ index(t2 a) */  *  from t2 where id &amp;gt; 10 and a &amp;gt;20;
+--------------
+explain select/*+ index(t2 a) */  *  from t2 where id &amp;gt; 10 and a &amp;gt;20
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+--------+----------+-----------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows   | filtered | Extra                 |
++----+-------------+-------+------------+-------+---------------+------+---------+------+--------+----------+-----------------------+
+|  1 | SIMPLE      | t2    | NULL       | range | a             | a    | 5       | NULL | 499193 |    33.33 | Using index condition |
++----+-------------+-------+------------+-------+---------------+------+---------+------+--------+----------+-----------------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;或者我们还可以通过 NO_INDEX(PRIMARY) 让MYSQL不强制走主键索引树。
+这次MYSQL选择了全表扫描 ： ALL&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain select/*+ no_index(t2 PRIMARY) */  *  from t2 where id &amp;gt; 10 and a &amp;gt;20;
+--------------
+explain select/*+ no_index(t2 PRIMARY) */  *  from t2 where id &amp;gt; 10 and a &amp;gt;20
+--------------
+
+
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows   | filtered | Extra       |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+|  1 | SIMPLE      | t2    | NULL       | ALL  | a             | NULL | NULL    | NULL | 998386 |    16.66 | Using where |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;INDEX_MERGE, NO_INDEX_MERGE: 表示是否指定不同的索引之间的交集或者并集&lt;/p&gt;
+
+&lt;p&gt;一般情况下情况下：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;where 条件中 使用了 AND 例如 a = 1 and b =1 一般会触发index merge的 交集&lt;/li&gt;
+  &lt;li&gt;where 条件中 使用了 OR 例如 a = 1 or b =1 一般会触发index merge的 并集&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;我们看一下例子： &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;where (t2.id &amp;gt; 10 OR t2.a &amp;lt; 1000) AND t2.a &amp;lt; 10000&lt;/code&gt; 这个是触发了索引之间的 sort_union(a,PRIMARY) 交集
+也就是说 索引 a和主键 PRIMARY的 soft_union 去重合并的操作&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;explain select /*+ index_merge(t2 a,PRIMARY) */ * from t2 where (t2.id &amp;gt; 10 OR  t2.a &amp;lt; 1000) AND  t2.a &amp;lt; 10000
+
+
++----+-------------+-------+------------+-------------+---------------+-----------+---------+------+--------+----------+------------------------------------------+
+| id | select_type | table | partitions | type        | possible_keys | key       | key_len | ref  | rows   | filtered | Extra                                    |
++----+-------------+-------+------------+-------------+---------------+-----------+---------+------+--------+----------+------------------------------------------+
+|  1 | SIMPLE      | t2    | NULL       | index_merge | PRIMARY,a     | a,PRIMARY | 5,4     | NULL | 500192 |   100.00 | Using sort_union(a,PRIMARY); Using where |
++----+-------------+-------+------------+-------------+---------------+-----------+---------+------+--------+----------+------------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;我们再来看一个例子： &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;where t2.b = 1 AND t2.a =2;&lt;/code&gt; 这个是触发了索引之间的 Using intersect(a,idx_b) 并集操作
+也就是说 索引 a和 索引idx_b 进行了 交集的操作&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;explain select/*+ index_merge(t2 idx_b,a)*/ * from t2 where t2.b = 1  AND  t2.a =2
+
+
+
++----+-------------+-------+------------+-------------+---------------+---------+---------+------+------+----------+----------------------------------------------------+
+| id | select_type | table | partitions | type        | possible_keys | key     | key_len | ref  | rows | filtered | Extra                                              |
++----+-------------+-------+------------+-------------+---------------+---------+---------+------+------+----------+----------------------------------------------------+
+|  1 | SIMPLE      | t2    | NULL       | index_merge | a,idx_b       | a,idx_b | 5,5     | NULL |    1 |   100.00 | Using intersect(a,idx_b); Using where; Using index |
++----+-------------+-------+------------+-------------+---------------+---------+---------+------+------+----------+----------------------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;JOIN_INDEX, NO_JOIN_INDEX： 指定表连接之间是否是走索引连接&lt;/p&gt;
+
+&lt;p&gt;我们可以看到 在使用了 hint /* +NO_JOIN_INDEX(t2 idx_b) */ 之后，表 t1,t2 的连接方式 从原来的 index nested loop join 改成了 hash join&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain select * from t1,t2 where t1.b = t2.b ;
+--------------
+explain select * from t1,t2 where t1.b = t2.b
+--------------
+
+
++----+-------------+-------+------------+------+---------------+-------+---------+-------------+------+----------+-------------+
+| id | select_type | table | partitions | type | possible_keys | key   | key_len | ref         | rows | filtered | Extra       |
++----+-------------+-------+------------+------+---------------+-------+---------+-------------+------+----------+-------------+
+|  1 | SIMPLE      | t1    | NULL       | ALL  | NULL          | NULL  | NULL    | NULL        | 1000 |   100.00 | Using where |
+|  1 | SIMPLE      | t2    | NULL       | ref  | idx_b         | idx_b | 5       | testdb.t1.b |    1 |   100.00 | NULL        |
++----+-------------+-------+------------+------+---------------+-------+---------+-------------+------+----------+-------------+
+2 rows in set, 1 warning (0.00 sec)
+
+
+root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain select/*+ NO_JOIN_INDEX(t2 idx_b) */ * from t1,t2 where t1.b = t2.b ;
+--------------
+explain select/*+ NO_JOIN_INDEX(t2 idx_b) */ * from t1,t2 where t1.b = t2.b
+--------------
+
+
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+--------------------------------------------+
+| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows   | filtered | Extra                                      |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+--------------------------------------------+
+|  1 | SIMPLE      | t1    | NULL       | ALL  | NULL          | NULL | NULL    | NULL |   1000 |   100.00 | NULL                                       |
+|  1 | SIMPLE      | t2    | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 998386 |     0.00 | Using where; Using join buffer (hash join) |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+--------------------------------------------+
+2 rows in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;MRR, NO_MRR: 是否启用multiple range read :&lt;/p&gt;
+
+&lt;p&gt;MRR 原理为 &lt;a href=&quot;https://www.modb.pro/db/365827&quot;&gt;参考&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;MRR的简单的原理如图：
+1）会把二级索引扫描到数据放到内存中
+2）在内存中按照ID的顺序进行排序， 这个内存的大小由参数 read_rnd_buffer_size 控制
+3）根据排序好得ID 顺序读取表的索引树&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;目前我们可以通过2种方式使用MRR：&lt;/p&gt;
+
+&lt;p&gt;1） set optimizer_switch = “mrr_cost_based=off”;&lt;/p&gt;
+
+&lt;p&gt;2）hint mrr&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@localhost:mysql_uatDB.sock [testdb]&amp;gt; set optimizer_switch =  &quot;mrr_cost_based=off&quot;;
+--------------
+set optimizer_switch =  &quot;mrr_cost_based=off&quot;
+--------------
+
+
+Query OK, 0 rows affected (0.00 sec)
+
+
+root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain  select  * from t1 where a &amp;gt; 20 and a &amp;lt; 200;
+--------------
+explain  select  * from t1 where a &amp;gt; 20 and a &amp;lt; 200
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra                  |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+|  1 | SIMPLE      | t1    | NULL       | range | a             | a    | 5       | NULL |  179 |   100.00 | Using where; Using MRR |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+
+root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain  select/*+mrr(t1)*/ * from t1 where a &amp;gt; 20 and a &amp;lt; 200;
+--------------
+explain  select/*+mrr(t1)*/ * from t1 where a &amp;gt; 20 and a &amp;lt; 200
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra                  |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+|  1 | SIMPLE      | t1    | NULL       | range | a             | a    | 5       | NULL |  179 |   100.00 | Using where; Using MRR |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+------------------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;NO_ICP: 关闭索引下推 索引下推 在实行计划里面对应的是 Using index condition&lt;/p&gt;
+
+&lt;p&gt;我们来看一个例子： a索引会在innodb 的存储引擎层进行 id &amp;gt; 10的过滤 再将最终的结果返回给mysql server&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;explain select * from t2 where t2.id &amp;gt; 10 and t2.a &amp;lt; 1000
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra                 |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+|  1 | SIMPLE      | t2    | NULL       | range | PRIMARY,a     | a    | 5       | NULL |  999 |    50.00 | Using index condition |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;我们使用 NO_ICP 尝试一下： 果然索引下推没有了，改为了 Using where 表示需要在mysql server的内存中对ID的值进行过滤&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain select/*+ no_icp(t2) */ * from t2 where t2.id &amp;gt; 10 and t2.a &amp;lt; 1000;
+--------------
+explain select/*+ no_icp(t2) */ * from t2 where t2.id &amp;gt; 10 and t2.a &amp;lt; 1000
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra       |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-------------+
+|  1 | SIMPLE      | t2    | NULL       | range | PRIMARY,a     | a    | 5       | NULL |  999 |    50.00 | Using where |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;NO_RANGE_OPTIMIZATION: 关闭索引范围的扫描&lt;/p&gt;
+
+&lt;p&gt;我们来看一个例子 本来是 t2表走的是索引范围的扫描，t2.a &amp;gt; 10 and t2.a &amp;lt; 10000;
+加上hint /*+ NO_RANGE_OPTIMIZATION(t2 a) */ 之后，弃用了索引范围访问，改为了全表扫描&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain select * from t2 where t2.a &amp;gt; 10 and t2.a &amp;lt; 10000;
+--------------
+explain select * from t2 where t2.a &amp;gt; 10 and t2.a &amp;lt; 10000
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra                 |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+|  1 | SIMPLE      | t2    | NULL       | range | a             | a    | 5       | NULL | 9989 |   100.00 | Using index condition |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+-----------------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+root@localhost:mysql_uatDB.sock [testdb]&amp;gt; expalin select/*+ NO_RANGE_OPTIMIZATION(t2 a) */ * from t2 where t2.a &amp;gt; 10 and t2.a &amp;lt; 10000;
+--------------
+desc select/*+ NO_RANGE_OPTIMIZATION(t2 a) */ * from t2 where t2.a &amp;gt; 10 and t2.a &amp;lt; 10000
+--------------
+
+
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows   | filtered | Extra       |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+|  1 | SIMPLE      | t2    | NULL       | ALL  | a             | NULL | NULL    | NULL | 998386 |    11.11 | Using where |
++----+-------------+-------+------------+------+---------------+------+---------+------+--------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;ORDER_INDEX, NO_ORDER_INDEX: 是否通过指定的索引来排序&lt;/p&gt;
+
+&lt;p&gt;我们来看这个例子中， where t2.a &amp;gt; 10 and t2.a &amp;lt; 10000 order by b; 走的是 a 列的索引，然后在进行ID的排序操作&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain select  * from t2 where t2.a &amp;gt; 10 and t2.a &amp;lt; 10000 order by b;
+--------------
+explain select  * from t2 where t2.a &amp;gt; 10 and t2.a &amp;lt; 10000 order by b
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+---------------------------------------+
+| id | select_type | table | partitions | type  | possible_keys | key  | key_len | ref  | rows | filtered | Extra                                 |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+---------------------------------------+
+|  1 | SIMPLE      | t2    | NULL       | range | a             | a    | 5       | NULL | 9989 |   100.00 | Using index condition; Using filesort |
++----+-------------+-------+------------+-------+---------------+------+---------+------+------+----------+---------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;我们尝试加个 hint /*+ ORDER_INDEX(t2 PRIMARY) */ 强制走主键ID的排序
+我们看到MYSQL的优化器改成了走主键索引， 这样就可以用到了 主键索引树的排序。&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@localhost:mysql_uatDB.sock [testdb]&amp;gt; explain select/*+ORDER_INDEX(t2 PRIMARY)*/  * from t2 where t2.a &amp;gt; 10 and t2.a &amp;lt; 10000 order by id;
+--------------
+explain select/*+ORDER_INDEX(t2 PRIMARY)*/  * from t2 where t2.a &amp;gt; 10 and t2.a &amp;lt; 10000 order by id
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+| id | select_type | table | partitions | type  | possible_keys | key     | key_len | ref  | rows   | filtered | Extra       |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+|  1 | SIMPLE      | t2    | NULL       | index | NULL          | PRIMARY | 4       | NULL | 998386 |    11.11 | Using where |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+--------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;SKIP_SCAN, NO_SKIP_SCAN: 是否进行索引的跳跃扫描&lt;/p&gt;
+
+&lt;p&gt;熟悉oracle 的小伙伴 都应该知道当索引是多键值复合索引的时候，当索引的第一列如果在WHERE 条件中不能够有效的触发的话，ORACLE 大爷的优化器会选择 index skip scan .
+同样的 mysql叔的优化器也是从version 8.0.13版本开始，也会有索引 skip scan这种方式。&lt;/p&gt;
+
+&lt;p&gt;我们采用官方文档的用例：&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f1&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;INT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f2&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;INT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;PRIMARY&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;KEY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;INSERT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INTO&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;VALUES&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;INSERT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INTO&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;INSERT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INTO&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;INSERT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INTO&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;INSERT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;INTO&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;40&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;ANALYZE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;我们来测试一下： WHERE f2 &amp;gt; 40 ， 主键为复合索引（f1,f2）, 当前只有 f2这个列来触发。
+我们可以看到了 索引扫描 进行了 skip scan (Using index for skip scan)&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;EXPLAIN SELECT f1, f2 FROM t1 WHERE f2 &amp;gt; 40
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+----------------------------------------+
+| id | select_type | table | partitions | type  | possible_keys | key     | key_len | ref  | rows | filtered | Extra                                  |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+----------------------------------------+
+|  1 | SIMPLE      | t1    | NULL       | range | PRIMARY       | PRIMARY | 8       | NULL |   53 |   100.00 | Using where; Using index for skip scan |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+----------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;我们同样可以用hint NO_SKIP_SCAN 来关闭 skip scan 这种索引跳跃的扫描方式。&lt;/p&gt;
+
+&lt;p&gt;可以看到了 索引改成了普通的扫描&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@localhost:mysql_uatDB.sock [sbtest]&amp;gt; EXPLAIN SELECT/*+no_skip_scan(t1 PRIMARY)*/ f1, f2 FROM t1 WHERE f2 &amp;gt; 40;
+--------------
+EXPLAIN SELECT/*+no_skip_scan(t1 PRIMARY)*/ f1, f2 FROM t1 WHERE f2 &amp;gt; 40
+--------------
+
+
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+--------------------------+
+| id | select_type | table | partitions | type  | possible_keys | key     | key_len | ref  | rows | filtered | Extra                    |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+--------------------------+
+|  1 | SIMPLE      | t1    | NULL       | index | NULL          | PRIMARY | 8       | NULL |  160 |    33.33 | Using where; Using index |
++----+-------------+-------+------------+-------+---------------+---------+---------+------+------+----------+--------------------------+
+1 row in set, 1 warning (0.00 sec)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;总结一下文本介绍了2大类型的HINT：&lt;/p&gt;
+
+&lt;p&gt;1)Join-Order Optimizer Hints –连接顺序相关的&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;JOIN_ORDER: 指定表的连接顺序&lt;/li&gt;
+  &lt;li&gt;JOIN_PREFIX: 设定第一个表顺序&lt;/li&gt;
+  &lt;li&gt;JOIN_SUFFIX: 设定最后一个表的顺序&lt;/li&gt;
+  &lt;li&gt;JOIN_FIXED_ORDER: 按照SQL写的顺序连接 类似于 STRAIGHT_JOIN&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;2)Index-Level Optimizer Hints –索引级别的&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;INDEX, NO_INDEX: 指定固定的索引访问&lt;/li&gt;
+  &lt;li&gt;INDEX_MERGE, NO_INDEX_MERGE: 指定索引之间是否进行交，并集的操作&lt;/li&gt;
+  &lt;li&gt;JOIN_INDEX, NO_JOIN_INDEX： 指定表连接之间是否是走索引连接&lt;/li&gt;
+  &lt;li&gt;MRR, NO_MRR: 是否启用multiple range read&lt;/li&gt;
+  &lt;li&gt;NO_ICP: 关闭索引下推&lt;/li&gt;
+  &lt;li&gt;NO_RANGE_OPTIMIZATION: 关闭索引范围的扫描&lt;/li&gt;
+  &lt;li&gt;ORDER_INDEX, NO_ORDER_INDEX: 是否通过指定的索引来排序&lt;/li&gt;
+  &lt;li&gt;SKIP_SCAN, NO_SKIP_SCAN: 是否进行索引的跳跃扫描&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;参考文档
+&lt;a href=&quot;https://dev.mysql.com/doc/refman/8.0/en/optimizer-hints.html&quot;&gt;官方文档&lt;/a&gt;&lt;/p&gt;</content><author><name>zhoubin</name></author><category term="mysql" /><summary type="html">每个程序员都喜欢优化，甚至有时我们知道不应该去做。为了满足大家的意愿，MySQL提供了一些关键字，在SQL语句中使用这些关键字，可以使得数据库按照明确的优化指令执行SQL语句。</summary></entry><entry><title type="html">.Net CQRS 服务基础框架 MyCloa</title><link href="https://zmngw.github.io/2023/10/09/.Net-CQRS%E6%9C%8D%E5%8A%A1%E5%9F%BA%E7%A1%80%E6%A1%86%E6%9E%B6/" rel="alternate" type="text/html" title=".Net CQRS 服务基础框架 MyCloa" /><published>2023-10-09T00:00:00+08:00</published><updated>2023-10-09T00:00:00+08:00</updated><id>https://zmngw.github.io/2023/10/09/.Net%20CQRS%E6%9C%8D%E5%8A%A1%E5%9F%BA%E7%A1%80%E6%A1%86%E6%9E%B6</id><content type="html" xml:base="https://zmngw.github.io/2023/10/09/.Net-CQRS%E6%9C%8D%E5%8A%A1%E5%9F%BA%E7%A1%80%E6%A1%86%E6%9E%B6/">&lt;h1 id=&quot;简介&quot;&gt;简介&lt;/h1&gt;
+&lt;p&gt;mycola 是一个使用 .Net Core 6.0 实现的一个 CQRS 基础框架。对外提供统一的命令执行接口，同时支持数据查询命令和数据执行命令，在注册中心的支持下，还支持远程命令调用。&lt;/p&gt;
+
+&lt;p&gt;同时还扩展了用户认证和授权验证，方便进行集成；所有命令都是支持强类型，简化应用开发，更易于上手。只要关注于业务，即命令，所有功能都由命令组成。&lt;/p&gt;
+
+&lt;h1 id=&quot;集成&quot;&gt;集成&lt;/h1&gt;
+
+&lt;p&gt;通过VS建立一个Api项目，如名称为：ApiServerSample，按如下步骤进行修改：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;建立IOC服务&lt;/p&gt;
+
+    &lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;c1&quot;&gt;/// &amp;lt;summary&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;c1&quot;&gt;/// Ioc服务实现&lt;/span&gt;
+ &lt;span class=&quot;c1&quot;&gt;/// &amp;lt;/summary&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ResolveService&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ResolveBase&lt;/span&gt;
+ &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+     &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IServiceProvider&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;serviceCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+     &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ResolveService&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IServiceProvider&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;service&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;base&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+         &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;serviceCollection&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;service&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+     &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Resolve&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;()&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+         &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;serviceCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetService&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;();&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+ &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;建立命令&lt;/p&gt;
+
+    &lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Name&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RequestAuthentication&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RequestAuthorization&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HelloCommand&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CommandBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+     &lt;span class=&quot;k&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;override&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ExecuteCore&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+         &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Hello &quot;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+ &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;调整Program.cs&lt;/p&gt;
+
+    &lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;c1&quot;&gt;// Add services to the container.&lt;/span&gt;
+ &lt;span class=&quot;c1&quot;&gt;//1、注册服务&lt;/span&gt;
+ &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Services&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AddApiHelp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ApiHelpOption&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+ &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+     &lt;span class=&quot;n&quot;&gt;ResolveType&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ResolveService&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+     &lt;span class=&quot;n&quot;&gt;ServerName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;ServerName&quot;&lt;/span&gt;
+ &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+    
+ &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Services&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AddControllers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    
+ &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;app&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Build&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    
+ &lt;span class=&quot;c1&quot;&gt;// Configure the HTTP request pipeline.&lt;/span&gt;
+    
+ &lt;span class=&quot;c1&quot;&gt;//2、扫描命令&lt;/span&gt;
+ &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Services&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ScanCommand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Assembly&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HelloCommand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Assembly&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;建立控制器&lt;/p&gt;
+
+    &lt;div class=&quot;language-csharp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ApiController&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+ &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Route&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/api&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CloaController&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Controller&lt;/span&gt;
+ &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+     &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IApiHelper&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_helper&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+     &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CloaController&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IApiHelper&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;helper&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+         &lt;span class=&quot;n&quot;&gt;_helper&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;helper&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Route&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;invoke&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpPost&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+     &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Task&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Invoke&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RequestStringEntity&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestStringEntity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+         &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_helper&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CommandData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;requestStringEntity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+ &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;运行Api程序
+ 此处运行时，程序在端口5052,本地访问地址为：http://localhost:5052&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;测试&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;在ApiPost软件中进行测试，访问地址为：http://localhost:5052/api/invoke&lt;/p&gt;
+
+&lt;p&gt;输入参数：&lt;/p&gt;
+
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;RequestId&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;CommandName&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ServiceName&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;Data&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;张三&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;输出结果：&lt;/p&gt;
+
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;Data&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Hello 张三&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;Result&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ErrorMessage&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ErrorCode&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+	&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;RequestId&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;94a61200-ca34-4e56-a9df-a851b7056159&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;详细的源码，请参考：&lt;a href=&quot;https://github.com/usteinfo/mycola/tree/main/Sample&quot;&gt;源码示例&lt;/a&gt;&lt;/p&gt;</content><author><name>zhoubin</name></author><category term="Net" /><category term="CQRS" /><summary type="html">简介 mycola 是一个使用 .Net Core 6.0 实现的一个 CQRS 基础框架。对外提供统一的命令执行接口，同时支持数据查询命令和数据执行命令，在注册中心的支持下，还支持远程命令调用。</summary></entry><entry><title type="html">遗留系统后端改造</title><link href="https://zmngw.github.io/2023/10/09/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E5%90%8E%E7%AB%AF%E6%94%B9%E9%80%A0/" rel="alternate" type="text/html" title="遗留系统后端改造" /><published>2023-10-09T00:00:00+08:00</published><updated>2023-10-09T00:00:00+08:00</updated><id>https://zmngw.github.io/2023/10/09/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E5%90%8E%E7%AB%AF%E6%94%B9%E9%80%A0</id><content type="html" xml:base="https://zmngw.github.io/2023/10/09/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E5%90%8E%E7%AB%AF%E6%94%B9%E9%80%A0/">&lt;p&gt;系统在经过产品设计，开发实现，完成测试到发布上线，在经历多次迭代和多次人员交替的过程中，很大程度上会出现，代码分层不清楚，组件之间的调用关系成网状结构。每一个组件的变更很难评估影响范围和测试范围，严重影响开发效率、测试效率，同时也直接造成发布后软件的不稳定。&lt;/p&gt;
+
+&lt;p&gt;系统出现上述特点就是典型的遗留系统。此处遗留系统改造特指遗留系统后端改造。&lt;/p&gt;
+
+&lt;h2 id=&quot;遗留系统后端的特点&quot;&gt;遗留系统后端的特点&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;代码质量差&lt;/li&gt;
+  &lt;li&gt;架构混乱&lt;/li&gt;
+  &lt;li&gt;缺少自动化测试&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;遗留系统后端改造的价值&quot;&gt;遗留系统后端改造的价值&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;可能成本太高，企业不愿意投入资源去改进；也可能是因为积重难返，根本改不动&lt;/li&gt;
+  &lt;li&gt;遗留系统蕴含大量数据资产&lt;/li&gt;
+  &lt;li&gt;遗留系统中藏匿着丰富的业务知识&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;系统功能改造&quot;&gt;系统功能改造&lt;/h2&gt;
+
+&lt;h3 id=&quot;改造目标&quot;&gt;改造目标&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;安全的可测试化重构&lt;/li&gt;
+  &lt;li&gt;补全测试&lt;/li&gt;
+  &lt;li&gt;测试保护下深度重构&lt;/li&gt;
+  &lt;li&gt;分层改造&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;改造过程&quot;&gt;改造过程&lt;/h3&gt;
+
+&lt;p&gt;遗留系统在改造的过程中，基本要经过如下三个阶段：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;补全测试&lt;/li&gt;
+  &lt;li&gt;深度重构&lt;/li&gt;
+  &lt;li&gt;分层改造&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;三个阶段相辅相成，补全测试为深度重构作准备，确保在深度重构后，系统的功能没有受影响，在深度重构完成后，再来进行相应的分层改造，使组件的关系层次分明，减少耦合。&lt;/p&gt;
+
+&lt;p&gt;同时改造内容要为业务服务，不做业务不需要的改造内容，改造内容要可度量。比如，对补全测试，可以考虑按如下可度量方式来做：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;通过对 库存模块 添加单元测试，可提高 库存模块 的内建立质量, 从而降低 库存模块 线上的Bug率
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;通过这样对目标的制定，关注成效，可实现可持续的改进。&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;通过对 XXX系统 进行分层改造，可提高 XXX系统 代码逻辑分层，减少代码组件之间的耦合，
+增强代码的扩展性，提高功能新增和变更的开发效率, 从而提高业务快速上线，降低整个功能的
+开发时间，节约成本，满足市场快速迭代的需要
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;补全测试&quot;&gt;补全测试&lt;/h4&gt;
+
+&lt;p&gt;系统要能补全测试，首先代码必须有可测试性，作为遗留系统来说，代码基本都是不可测试的。&lt;/p&gt;
+
+&lt;p&gt;把需要补全测试的代码，对于第三方依赖项，如数据库访问，消息队列，缓存等服务进行接口化处理，在通过代码中构造注入，函数注入的方式，来减少依赖，提供测试可 Mock 处理。&lt;/p&gt;
+
+&lt;p&gt;代码可测试性的处理，常用有如下方法：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;按接口提取方式，通过构造，方法，属性的方式进行注入隔离&lt;/li&gt;
+  &lt;li&gt;在无法使用方法 1 的情况下，可以使用：创建新的方法，在旧方法中进行调用，让新方法做到可测试&lt;/li&gt;
+  &lt;li&gt;在不变更原始方法的前提下，新增方法，再调用原来的方法来实现业务逻辑&lt;/li&gt;
+  &lt;li&gt;针对大量 if else 的场景，以表格的方式整理各分支的条件关系，再进一步进行拆分处理&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;深度重构&quot;&gt;深度重构&lt;/h4&gt;
+
+&lt;p&gt;在代码重构前，能写好所有的单元测试，便于在重构后验证业务逻辑是否与重构前一致。&lt;/p&gt;
+
+&lt;p&gt;深度重构主要把一业务长方法，重构为业务清晰短方法，可按如下方法处理：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;分析代码，识别出代码共包括几个阶段&lt;/li&gt;
+  &lt;li&gt;移动代码，将相同阶段的代码放到一起，不同阶段的代码用窄分隔&lt;/li&gt;
+  &lt;li&gt;将各个阶段的代码提取成小方法&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;分层改造&quot;&gt;分层改造&lt;/h4&gt;
+
+&lt;p&gt;按领域驱动设计的方式，对代码结构进行调整，基本结构如下：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;层次名称&lt;/th&gt;
+      &lt;th&gt;依赖&lt;/th&gt;
+      &lt;th&gt;说明&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;UI&lt;/td&gt;
+      &lt;td&gt;网关&lt;/td&gt;
+      &lt;td&gt;用户交互媒价&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;网关&lt;/td&gt;
+      &lt;td&gt;Appliction Server&lt;/td&gt;
+      &lt;td&gt;对外提供服务接口&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Appliction Server&lt;/td&gt;
+      &lt;td&gt;Domain,Infrastructure&lt;/td&gt;
+      &lt;td&gt;应用服务，实现应用逻辑&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Domain&lt;/td&gt;
+      &lt;td&gt;仓储层、Infrastructure&lt;/td&gt;
+      &lt;td&gt;系统领域层，实现领域逻辑&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;仓储层&lt;/td&gt;
+      &lt;td&gt;Infrastructure&lt;/td&gt;
+      &lt;td&gt;实现领域数据存储实现&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Infrastructure&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;基础架构，包括数据存储，缓存，消息队列基础服务的实现&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&quot;新增模块&quot;&gt;新增模块&lt;/h2&gt;
+
+&lt;p&gt;新增模块，采用上面分层改造的结构进行处理，同时有访问旧有系统功能时，可以采用如下方式进行：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;通过旧系统公布API的方式获取数据&lt;/li&gt;
+  &lt;li&gt;原有系统有消息队列的时，可采用数据异步同步&lt;/li&gt;
+  &lt;li&gt;数据库之间采用CDC方式进行数据同步&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;小结&quot;&gt;小结&lt;/h2&gt;
+
+&lt;p&gt;要执行好上述内容，也需要从管理上制定一些策略：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;制定编码规范&lt;/li&gt;
+  &lt;li&gt;设计项目分层结构&lt;/li&gt;
+  &lt;li&gt;code review 编码规范的执行,建议引入代码分析平台　sonar&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>zhoubin</name></author><category term="遗留系统" /><category term="改造" /><summary type="html">系统在经过产品设计，开发实现，完成测试到发布上线，在经历多次迭代和多次人员交替的过程中，很大程度上会出现，代码分层不清楚，组件之间的调用关系成网状结构。每一个组件的变更很难评估影响范围和测试范围，严重影响开发效率、测试效率，同时也直接造成发布后软件的不稳定。</summary></entry></feed>
