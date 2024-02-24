@@ -285,6 +285,14 @@
     } ,
   
     {
+      "title"    : "通过命令获取IPV6地址",
+      "category" : "linux",
+      
+      "url"      : "https://zmngw.github.io/2024/02/24/getipv6address/",
+      "keywords" : "linux, ipv6"
+    } ,
+  
+    {
       "title"    : "CIDR",
       "category" : "",
       

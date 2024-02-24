@@ -1,4 +1,46 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.3">Jekyll</generator><link href="https://zmngw.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://zmngw.github.io/" rel="alternate" type="text/html" /><updated>2024-02-23T21:49:26+08:00</updated><id>https://zmngw.github.io/feed.xml</id><title type="html">码农感悟</title><subtitle>zhoubin的个人博客，公众号：码农感悟</subtitle><author><name>zhoubin</name></author><entry><title type="html">Centos Linux配置网卡静态IP和开启SSH服务</title><link href="https://zmngw.github.io/2024/02/23/centosopenssh/" rel="alternate" type="text/html" title="Centos Linux配置网卡静态IP和开启SSH服务" /><published>2024-02-23T00:00:00+08:00</published><updated>2024-02-23T00:00:00+08:00</updated><id>https://zmngw.github.io/2024/02/23/centosopenssh</id><content type="html" xml:base="https://zmngw.github.io/2024/02/23/centosopenssh/">&lt;p&gt;重新安装系统，都需要配置网卡，同时方便远程连接，也会开启SSH服务。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.3">Jekyll</generator><link href="https://zmngw.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://zmngw.github.io/" rel="alternate" type="text/html" /><updated>2024-02-24T19:57:11+08:00</updated><id>https://zmngw.github.io/feed.xml</id><title type="html">码农感悟</title><subtitle>zhoubin的个人博客，公众号：码农感悟</subtitle><author><name>zhoubin</name></author><entry><title type="html">通过命令获取IPV6地址</title><link href="https://zmngw.github.io/2024/02/24/getipv6address/" rel="alternate" type="text/html" title="通过命令获取IPV6地址" /><published>2024-02-24T00:00:00+08:00</published><updated>2024-02-24T00:00:00+08:00</updated><id>https://zmngw.github.io/2024/02/24/getipv6address</id><content type="html" xml:base="https://zmngw.github.io/2024/02/24/getipv6address/">&lt;p&gt;Windows使用 powershell 脚本、其它使用 bash 脚本
+在Linux系统中获取网卡eth1的IPv6地址&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ip -6 addr show eth1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;获取局域网中的其它设备IPv6地址&lt;/p&gt;
+
+&lt;p&gt;其它设备需要支持EUI-64（IPv6后半部分包含ff:fe）&lt;/p&gt;
+
+&lt;p&gt;Linux&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ip -6 route | awk &apos;{print $1}&apos; | awk &apos;/240:?/&apos; | awk -F::/ &apos;{print $1 &quot;:suffix of other mac&quot;}&apos;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Windows&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Get-NetRoute -AddressFamily IPv6 | Where-Object { $_.DestinationPrefix.StartsWith(&quot;240&quot;) -and $_.DestinationPrefix.endsWith(&quot;/64&quot;) } | ForEach-Object { ($_.DestinationPrefix -split &apos;::/&apos;)[0] + &quot;:suffix of other mac&quot; }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Linux 仅获取纯公网 IPv6 地址&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ip -6 addr | grep inet6 | awk -F &apos;[ \t]+|/&apos; &apos;$3 == &quot;::1&quot; { next;} $3 ~ /^fe80::/ { next;} /inet6/ {print $3}&apos;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Mac 仅获取纯公网 IPv6 地址&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ifconfig | grep inet6 | awk -F &apos;[ \t]+|/&apos; &apos;$3 == &quot;::1&quot; { next;} $3 ~ /^fe80::/ { next;} /inet6/ {print $3}&apos;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;在Windows中获取IPv6地址&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ipconfig | findstr IPv6
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;linux获取最长ipv6地址&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ip -6 addr | grep inet6 | awk -F &apos;[ \t]+|/&apos; &apos;$3 == &quot;::1&quot; { next;} $3 ~ /^fe80::/ { next;} /inet6/ {print $3}&apos; | awk &apos;{ln=length}ln&amp;gt;max{delete result; max=ln}ln==max{result[NR]=$0}END{for(i in result) print result[i] }&apos;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;本文章参考：
+&lt;a href=&quot;https://github.com/jeessy2/ddns-go/issues/531&quot;&gt;通过命令获取IP参考&lt;/a&gt;
+&lt;a href=&quot;https://github.com/jeessy2/ddns-go/wiki/%E9%80%9A%E8%BF%87%E5%91%BD%E4%BB%A4%E8%8E%B7%E5%8F%96IP%E5%8F%82%E8%80%83#linux-%E4%BB%85%E8%8E%B7%E5%8F%96%E7%BA%AF%E5%85%AC%E7%BD%91-ipv6-%E5%9C%B0%E5%9D%80&quot;&gt;通过命令获取IP参考&lt;/a&gt;&lt;/p&gt;</content><author><name>zhoubin</name></author><category term="linux" /><category term="ipv6" /><summary type="html">Windows使用 powershell 脚本、其它使用 bash 脚本 在Linux系统中获取网卡eth1的IPv6地址</summary></entry><entry><title type="html">Centos Linux配置网卡静态IP和开启SSH服务</title><link href="https://zmngw.github.io/2024/02/23/centosopenssh/" rel="alternate" type="text/html" title="Centos Linux配置网卡静态IP和开启SSH服务" /><published>2024-02-23T00:00:00+08:00</published><updated>2024-02-23T00:00:00+08:00</updated><id>https://zmngw.github.io/2024/02/23/centosopenssh</id><content type="html" xml:base="https://zmngw.github.io/2024/02/23/centosopenssh/">&lt;p&gt;重新安装系统，都需要配置网卡，同时方便远程连接，也会开启SSH服务。&lt;/p&gt;
 
 &lt;h3 id=&quot;网卡配置&quot;&gt;网卡配置&lt;/h3&gt;
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[root@localhost ~]# nmcli conn add type ethernet con-name ens33 ifname ens33
@@ -2447,148 +2489,4 @@ EXPLAIN SELECT/*+no_skip_scan(t1 PRIMARY)*/ f1, f2 FROM t1 WHERE f2 &amp;gt; 40
 &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;详细的源码，请参考：&lt;a href=&quot;https://github.com/usteinfo/mycola/tree/main/Sample&quot;&gt;源码示例&lt;/a&gt;&lt;/p&gt;</content><author><name>zhoubin</name></author><category term="Net" /><category term="CQRS" /><summary type="html">简介 mycola 是一个使用 .Net Core 6.0 实现的一个 CQRS 基础框架。对外提供统一的命令执行接口，同时支持数据查询命令和数据执行命令，在注册中心的支持下，还支持远程命令调用。</summary></entry><entry><title type="html">遗留系统后端改造</title><link href="https://zmngw.github.io/2023/10/09/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E5%90%8E%E7%AB%AF%E6%94%B9%E9%80%A0/" rel="alternate" type="text/html" title="遗留系统后端改造" /><published>2023-10-09T00:00:00+08:00</published><updated>2023-10-09T00:00:00+08:00</updated><id>https://zmngw.github.io/2023/10/09/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E5%90%8E%E7%AB%AF%E6%94%B9%E9%80%A0</id><content type="html" xml:base="https://zmngw.github.io/2023/10/09/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E5%90%8E%E7%AB%AF%E6%94%B9%E9%80%A0/">&lt;p&gt;系统在经过产品设计，开发实现，完成测试到发布上线，在经历多次迭代和多次人员交替的过程中，很大程度上会出现，代码分层不清楚，组件之间的调用关系成网状结构。每一个组件的变更很难评估影响范围和测试范围，严重影响开发效率、测试效率，同时也直接造成发布后软件的不稳定。&lt;/p&gt;
-
-&lt;p&gt;系统出现上述特点就是典型的遗留系统。此处遗留系统改造特指遗留系统后端改造。&lt;/p&gt;
-
-&lt;h2 id=&quot;遗留系统后端的特点&quot;&gt;遗留系统后端的特点&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;代码质量差&lt;/li&gt;
-  &lt;li&gt;架构混乱&lt;/li&gt;
-  &lt;li&gt;缺少自动化测试&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;遗留系统后端改造的价值&quot;&gt;遗留系统后端改造的价值&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;可能成本太高，企业不愿意投入资源去改进；也可能是因为积重难返，根本改不动&lt;/li&gt;
-  &lt;li&gt;遗留系统蕴含大量数据资产&lt;/li&gt;
-  &lt;li&gt;遗留系统中藏匿着丰富的业务知识&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;系统功能改造&quot;&gt;系统功能改造&lt;/h2&gt;
-
-&lt;h3 id=&quot;改造目标&quot;&gt;改造目标&lt;/h3&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;安全的可测试化重构&lt;/li&gt;
-  &lt;li&gt;补全测试&lt;/li&gt;
-  &lt;li&gt;测试保护下深度重构&lt;/li&gt;
-  &lt;li&gt;分层改造&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;改造过程&quot;&gt;改造过程&lt;/h3&gt;
-
-&lt;p&gt;遗留系统在改造的过程中，基本要经过如下三个阶段：&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;补全测试&lt;/li&gt;
-  &lt;li&gt;深度重构&lt;/li&gt;
-  &lt;li&gt;分层改造&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;三个阶段相辅相成，补全测试为深度重构作准备，确保在深度重构后，系统的功能没有受影响，在深度重构完成后，再来进行相应的分层改造，使组件的关系层次分明，减少耦合。&lt;/p&gt;
-
-&lt;p&gt;同时改造内容要为业务服务，不做业务不需要的改造内容，改造内容要可度量。比如，对补全测试，可以考虑按如下可度量方式来做：&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;通过对 库存模块 添加单元测试，可提高 库存模块 的内建立质量, 从而降低 库存模块 线上的Bug率
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;通过这样对目标的制定，关注成效，可实现可持续的改进。&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;通过对 XXX系统 进行分层改造，可提高 XXX系统 代码逻辑分层，减少代码组件之间的耦合，
-增强代码的扩展性，提高功能新增和变更的开发效率, 从而提高业务快速上线，降低整个功能的
-开发时间，节约成本，满足市场快速迭代的需要
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h4 id=&quot;补全测试&quot;&gt;补全测试&lt;/h4&gt;
-
-&lt;p&gt;系统要能补全测试，首先代码必须有可测试性，作为遗留系统来说，代码基本都是不可测试的。&lt;/p&gt;
-
-&lt;p&gt;把需要补全测试的代码，对于第三方依赖项，如数据库访问，消息队列，缓存等服务进行接口化处理，在通过代码中构造注入，函数注入的方式，来减少依赖，提供测试可 Mock 处理。&lt;/p&gt;
-
-&lt;p&gt;代码可测试性的处理，常用有如下方法：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;按接口提取方式，通过构造，方法，属性的方式进行注入隔离&lt;/li&gt;
-  &lt;li&gt;在无法使用方法 1 的情况下，可以使用：创建新的方法，在旧方法中进行调用，让新方法做到可测试&lt;/li&gt;
-  &lt;li&gt;在不变更原始方法的前提下，新增方法，再调用原来的方法来实现业务逻辑&lt;/li&gt;
-  &lt;li&gt;针对大量 if else 的场景，以表格的方式整理各分支的条件关系，再进一步进行拆分处理&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h4 id=&quot;深度重构&quot;&gt;深度重构&lt;/h4&gt;
-
-&lt;p&gt;在代码重构前，能写好所有的单元测试，便于在重构后验证业务逻辑是否与重构前一致。&lt;/p&gt;
-
-&lt;p&gt;深度重构主要把一业务长方法，重构为业务清晰短方法，可按如下方法处理：&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;分析代码，识别出代码共包括几个阶段&lt;/li&gt;
-  &lt;li&gt;移动代码，将相同阶段的代码放到一起，不同阶段的代码用窄分隔&lt;/li&gt;
-  &lt;li&gt;将各个阶段的代码提取成小方法&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;分层改造&quot;&gt;分层改造&lt;/h4&gt;
-
-&lt;p&gt;按领域驱动设计的方式，对代码结构进行调整，基本结构如下：&lt;/p&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;层次名称&lt;/th&gt;
-      &lt;th&gt;依赖&lt;/th&gt;
-      &lt;th&gt;说明&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;UI&lt;/td&gt;
-      &lt;td&gt;网关&lt;/td&gt;
-      &lt;td&gt;用户交互媒价&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;网关&lt;/td&gt;
-      &lt;td&gt;Appliction Server&lt;/td&gt;
-      &lt;td&gt;对外提供服务接口&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Appliction Server&lt;/td&gt;
-      &lt;td&gt;Domain,Infrastructure&lt;/td&gt;
-      &lt;td&gt;应用服务，实现应用逻辑&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Domain&lt;/td&gt;
-      &lt;td&gt;仓储层、Infrastructure&lt;/td&gt;
-      &lt;td&gt;系统领域层，实现领域逻辑&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;仓储层&lt;/td&gt;
-      &lt;td&gt;Infrastructure&lt;/td&gt;
-      &lt;td&gt;实现领域数据存储实现&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Infrastructure&lt;/td&gt;
-      &lt;td&gt; &lt;/td&gt;
-      &lt;td&gt;基础架构，包括数据存储，缓存，消息队列基础服务的实现&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;h2 id=&quot;新增模块&quot;&gt;新增模块&lt;/h2&gt;
-
-&lt;p&gt;新增模块，采用上面分层改造的结构进行处理，同时有访问旧有系统功能时，可以采用如下方式进行：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;通过旧系统公布API的方式获取数据&lt;/li&gt;
-  &lt;li&gt;原有系统有消息队列的时，可采用数据异步同步&lt;/li&gt;
-  &lt;li&gt;数据库之间采用CDC方式进行数据同步&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;小结&quot;&gt;小结&lt;/h2&gt;
-
-&lt;p&gt;要执行好上述内容，也需要从管理上制定一些策略：&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;制定编码规范&lt;/li&gt;
-  &lt;li&gt;设计项目分层结构&lt;/li&gt;
-  &lt;li&gt;code review 编码规范的执行,建议引入代码分析平台　sonar&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>zhoubin</name></author><category term="遗留系统" /><category term="改造" /><summary type="html">系统在经过产品设计，开发实现，完成测试到发布上线，在经历多次迭代和多次人员交替的过程中，很大程度上会出现，代码分层不清楚，组件之间的调用关系成网状结构。每一个组件的变更很难评估影响范围和测试范围，严重影响开发效率、测试效率，同时也直接造成发布后软件的不稳定。</summary></entry></feed>
+&lt;p&gt;详细的源码，请参考：&lt;a href=&quot;https://github.com/usteinfo/mycola/tree/main/Sample&quot;&gt;源码示例&lt;/a&gt;&lt;/p&gt;</content><author><name>zhoubin</name></author><category term="Net" /><category term="CQRS" /><summary type="html">简介 mycola 是一个使用 .Net Core 6.0 实现的一个 CQRS 基础框架。对外提供统一的命令执行接口，同时支持数据查询命令和数据执行命令，在注册中心的支持下，还支持远程命令调用。</summary></entry></feed>
